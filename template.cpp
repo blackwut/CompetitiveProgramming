@@ -1,9 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
 
-#include <bits/stdc++.h> 
+void solution(vector<int> & v)
+{
+    // auto r = v.begin();
+    // auto r = v.rbegin();
+}
 
-int main() {
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
 
-    std::ios_base::sync_with_stdio(false);
+    int T;
+    int N;
+    vector<int> v;
+
+    cin >> T;
+    
+    while (T--)
+    {
+        cin >> N;
+        v.reserve(N);
+        while (N--)
+        {
+            int x;
+            cin >> x;
+            v.push_back(x);
+        }
+
+        int result = solution(v);
+        cout << result;
+        cout << endl;
+
+        v.clear();
+    }
 
     return 0;
 }
