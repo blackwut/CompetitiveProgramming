@@ -1,3 +1,16 @@
+/**
+    Author:  Alberto Ottimo
+    Problem: https://practice.geeksforgeeks.org/problems/leaders-in-an-array/0
+
+    Solution Description
+    Iterate the array in the reverse way, starting from the end, checking if
+    the element is greater than the max. If that is true, consider this element 
+    a leader.
+
+    Time  Complexity: O(N)
+    Space Complexity: O(N)
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 

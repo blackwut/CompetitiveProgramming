@@ -1,3 +1,16 @@
+/**
+    Author:  Alberto Ottimo
+    Problem: https://practice.geeksforgeeks.org/problems/missing-number-in-array/0
+
+    Solution Description
+    Be sum = "prefix sum on the given array".
+    Since the sum of numbers from 1 to N is nsum = (N * (N + 1)) / 2
+    hence the missingNumber = nsum - sum
+
+    Time  Complexity: O(N)
+    Space Complexity: O(1)
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 
