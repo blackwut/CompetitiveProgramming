@@ -11,19 +11,18 @@
     Space Complexity: O(N)
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
-vector<int> leaders(vector<int> & v)
+vector<int> leaders(const vector<int> & v)
 {
     vector<int> result;
-
-    auto r = v.rbegin();
-    int max = (int) *r;
+    int max = v.back();
     result.push_back(max);
 
-    while (++r != v.rend()) {
-        const int val = (int) *r;
+    for (auto r = v.rbegin() + 1; r != v.rend(); ++r) {
+        const int val = *r;
         if (val >= max) {
             max = val;
             result.push_back(val);
@@ -39,29 +38,26 @@ int main()
     cin.tie(NULL);
 
     int T;
-    int N;
-    vector<int> v;
-
     cin >> T;
-    
-    while (T--)
-    {
+
+    for (int i = 0; i < T; ++i) {
+        int N;
         cin >> N;
+        vector<int> v;
         v.reserve(N);
-        while (N--)
-        {
+        for (int j = 0; j < N; ++j) {
             int x;
             cin >> x;
             v.push_back(x);
         }
 
         vector<int> result = leaders(v);
-
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << " ";
         }
         cout << endl;
 
+        result.clear();
         v.clear();
     }
 

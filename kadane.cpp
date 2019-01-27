@@ -3,8 +3,8 @@
     Problem: https://practice.geeksforgeeks.org/problems/kadanes-algorithm/0
 
     Solution Description
-    Iterate the array and sum the elements if the sum remains positive. If not
-    replace sum with the current element and go on iterating.
+    Iterate the array and add the current element to sum if the sum is positive,
+    otherwise replace sum with the current element and go on iterating.
     Compare the sum with the max, if the sum is larger, update max with sum.
     The max value will be the maximum sum of a sub-array because:
     1. The sum of each prefix sub-array of the maximum sum is positive,
@@ -13,23 +13,23 @@
        sub-array is negative
 
     Time  Complexity: O(N)
-    Space Complexity: O(1)
+    Space Complexity: O(N)
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
 int kadane(vector<int> & v)
 {
-    auto i = v.begin();
-    int sum = (int) *i;
+    int sum = v.front();
     int max = sum;
 
-    for (++i; i != v.end(); ++i)
-    {
-        const int val = (int) *i;
+    for (auto i = v.begin() + 1; i != v.end(); ++i) {
+        const int val = *i;
         sum = (sum > 0) ? sum + val : val;
-        if (sum > max) max = sum;
+        if (sum > max)
+            max = sum;
     }
 
     return max;
@@ -41,17 +41,14 @@ int main()
     cin.tie(NULL);
 
     int T;
-    int N;
-    vector<int> v;
-
     cin >> T;
-    
-    while (T--)
-    {
+
+    for (int t = 0; t < T; ++t) {
+        int N;
         cin >> N;
+        vector<int> v;
         v.reserve(N);
-        while (N--)
-        {
+        for (int n = 0; n < N; ++n) {
             int x;
             cin >> x;
             v.push_back(x);

@@ -4,26 +4,15 @@
 
     Solution Description
     Be sum = "prefix sum on the given array".
-    Since the sum of numbers from 1 to N is nsum = (N * (N + 1)) / 2
-    hence the missingNumber = nsum - sum
+    Since the sum of numbers from 1 to N is totalSum = (N * (N + 1)) / 2
+    hence the missingNumber = totalSum - sum
 
     Time  Complexity: O(N)
     Space Complexity: O(1)
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
-
-int missingNumber(vector<int> & v)
-{
-    int sum = 0;
-    for (auto i = v.begin(); i != v.end(); ++i) {
-        sum += (int) *i;
-    }
-
-    const int size = v.size() + 1;
-    return (size * (size + 1)) / 2 - sum;
-}
 
 int main()
 {
@@ -31,27 +20,20 @@ int main()
     cin.tie(NULL);
 
     int T;
-    int N;
-    vector<int> v;
-
     cin >> T;
-    
-    while (T--)
-    {
+
+    for (int i = 0; i < T; ++i) {
+        int N;
         cin >> N;
-        v.reserve(--N);
-        while (N--)
-        {
+        const int totalSum = N * (N + 1) / 2;
+        int sum = 0;
+        for (int j = 0; j < N - 1; ++j) {
             int x;
             cin >> x;
-            v.push_back(x);
+            sum += x;
         }
-
-        int result = missingNumber(v);
-        cout << result;
+        cout << totalSum - sum;
         cout << endl;
-
-        v.clear();
     }
 
     return 0;

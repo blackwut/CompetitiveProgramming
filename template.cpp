@@ -9,12 +9,13 @@
     Space Complexity: O()
 */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
-void solution(vector<int> & v)
+void solution(const vector<int> & v)
 {
-    // auto r = v.begin();
+    // auto i = v.begin();
     // auto r = v.rbegin();
 }
 
@@ -24,17 +25,14 @@ int main()
     cin.tie(NULL);
 
     int T;
-    int N;
-    vector<int> v;
-
     cin >> T;
-    
-    while (T--)
-    {
+
+    for (int t = 0; t < T; ++t) {
+        int N;
         cin >> N;
+        vector<int> v;
         v.reserve(N);
-        while (N--)
-        {
+        for (int n = 0; n < N; ++n) {
             int x;
             cin >> x;
             v.push_back(x);
