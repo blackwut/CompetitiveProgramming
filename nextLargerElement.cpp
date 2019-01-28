@@ -21,16 +21,16 @@
 #include <stack>
 using namespace std;
 
-vector<int> nextLargerElement(const vector<int> & v)
+vector<long> nextLargerElement(const vector<long> & v)
 {
-    vector<int> result;
+    vector<long> result;
     result.reserve(v.size());
-    stack<int> s;
+    stack<long> s;
 
     for (auto i = v.rbegin(); i != v.rend(); ++i) {
-        int r = -1;
+        long r = -1;
         while (!s.empty()) {
-            const int val = s.top();
+            const long val = s.top();
             if (val > *i) {
                 r = val;
                 break;
@@ -56,15 +56,15 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<int> v;
+        vector<long> v;
         v.reserve(N);
         for (int n = 0; n < N; ++n) {
-            int x;
+            long x;
             cin >> x;
             v.push_back(x);
         }
 
-        vector<int> result = nextLargerElement(v);
+        vector<long> result = nextLargerElement(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << " ";
         }
