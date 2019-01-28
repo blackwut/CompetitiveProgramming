@@ -3,10 +3,12 @@
     Problem: http://codeforces.com/problemset/problem/37/A?locale=en
 
     Solution Description
-    
+    Sort the array of elements.
+    Count how many elements have the same value to determin the max height.
+    Count how many distinct elements are in the array.
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time. Complexity: O(N log N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
