@@ -3,14 +3,13 @@
     Problem: https://practice.geeksforgeeks.org/problems/next-larger-element/0
 
     Solution Description
-    Iterating in the reverse way the provided array of elements. Make use of a
-    stack in order to keep all elements after the current one.
-    If there is no "next greater element", -1 is stored in the result vector.
-    Otherwise iterate over the stack to find the first greater element of the 
-    current one removing all elements smaller the current one. If no element is
-    greater than the current one, it is stored -1 in the result vector.
-    In any case, the current element is pushed into the stack because is the
-    next element in the next iteration.
+    Iterating in the reverse way the array of elements. Make use of a stack to
+    keep elements larger than the current one.
+    For each element in the array, iterate over the stack to find the first
+    greater element, removing all elements that are smaller.
+    If no element is greater than the current one, the value -1 is stored in the
+    result vector.
+    Then the current element is pushed into the stack.
 
     Time  Complexity: O(N)
     Space Complexity: O(N)
@@ -21,16 +20,16 @@
 #include <stack>
 using namespace std;
 
-vector<long> nextLargerElement(const vector<long> & v)
+vector<int64_t> nextLargerElement(const vector<int64_t> & v)
 {
-    vector<long> result;
+    vector<int64_t> result;
     result.reserve(v.size());
-    stack<long> s;
+    stack<int64_t> s;
 
     for (auto i = v.rbegin(); i != v.rend(); ++i) {
-        long r = -1;
+        int64_t r = -1;
         while (!s.empty()) {
-            const long val = s.top();
+            const int64_t val = s.top();
             if (val > *i) {
                 r = val;
                 break;
@@ -56,15 +55,15 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<long> v;
+        vector<int64_t> v;
         v.reserve(N);
         for (int n = 0; n < N; ++n) {
-            long x;
+            int64_t x;
             cin >> x;
             v.push_back(x);
         }
 
-        vector<long> result = nextLargerElement(v);
+        vector<int64_t> result = nextLargerElement(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << " ";
         }
