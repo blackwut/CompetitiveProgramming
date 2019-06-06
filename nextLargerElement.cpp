@@ -63,7 +63,7 @@ int main()
             v.push_back(x);
         }
 
-        vector<int64_t> result = nextLargerElement(v);
+        vector<int64_t> result = nextLargerElement<int64_t>(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << " ";
         }
