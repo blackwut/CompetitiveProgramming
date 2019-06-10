@@ -2,9 +2,9 @@ CXX			= g++
 CXXFLAGS	= -std=c++14 -O3 -Wall -pedantic
 INCLUDES	= -I.
 
-%.o:%.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -o $@
+%:%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -o $@.o
 
 .PHONY: clean
 clean:
-	$(RM) *.o *~
+	$(RM) -rf *.o *~ *.dSYM
