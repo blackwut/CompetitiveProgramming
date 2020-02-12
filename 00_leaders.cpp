@@ -4,7 +4,7 @@
 
     Solution Description
     Iterate the array in the reverse way, starting from the end, checking if
-    the element is greater than the max. If that is true, consider this element 
+    the element is greater than the max. If that is true, consider this element
     a leader.
 
     Time  Complexity: O(N)

@@ -1,22 +1,44 @@
 #pragma once
 
-/* 
-  Code from https://github.com/spaghetti-source/algorithm/blob/master/data_structure/fenwick_tree.cc
- */
+//
+// Modified code found at https://github.com/spaghetti-source/algorithm/blob/master/data_structure/fenwick_tree.cc
+//
+
+// Fenwick Tree (aka. binary indexed tree)
+//
+// Description:
+//   A data structure that allows 
+//     add(k,a):       b[k] += a
+//     sum(k):         b[0] + ... + b[k-1]
+//     lower_bound(a): min { k : sum(k) >= a }
+//
+// Algorithm:
+//  [                    1000                     ]
+//  [         100         ] [                     ]
+//  [   010   ] [         ] [   110   ] [         ]
+//  [001] [   ] [011] [   ] [101] [   ] [111] [   ]
+//
+//  - x[k] maintains the segment b[*,k).
+//  - k + (k & (k + 1)) is the immediate ancestor of k
+//  - k - (k & (k - 1)) is the rightmost left segment of k
+//
+// Complexity:
+//   O(log n) access, n space.
+//
 
 #include <vector>
 
 template <typename T>
-struct fenwick_tree
+struct BIT
 {
     std::vector<T> x;
 
-    fenwick_tree(size_t n) :
+    BIT(size_t n) :
     x(n + 1)
     {}
 
     // initialize by a constant
-    fenwick_tree(size_t n, T a) :
+    BIT(size_t n, T a) :
     x(n + 1, a)
     {
         x[0] = 0;
@@ -26,7 +48,7 @@ struct fenwick_tree
     }
 
     // initialize by a std::vector
-    fenwick_tree(std::vector<T> y) :
+    BIT(std::vector<T> y) :
     x(y.size() + 1)
     {
         for (int k = 0; k < y.size(); ++k) {
@@ -34,7 +56,7 @@ struct fenwick_tree
         }
 
         for (int k = 1; k + (k & -k) < x.size(); ++k) {
-            x[k+(k&-k)] += x[k];
+            x[k + (k & -k)] += x[k];
         }
     }
 
@@ -47,7 +69,7 @@ struct fenwick_tree
     }
   
     // sum b[0,k)
-    T sum(int k)
+    T getSum(int k)
     {
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
@@ -59,7 +81,7 @@ struct fenwick_tree
     // sum b[l, r)
     T rangeSum(int l, int r)
     {
-        return sum(r) - sum(l);
+        return getSum(r) - getSum(l - 1);
     }
 
     // min { k : sum(k) >= a }; it requires b[k] >= 0
@@ -70,7 +92,7 @@ struct fenwick_tree
         }
 
         int k = x.size() - 1; 
-        for (int s: {1,2,4,8,16}) {
+        for (int s: {1, 2, 4, 8, 16}) {
             k |= (k >> s);
         }
 
@@ -87,8 +109,8 @@ struct fenwick_tree
     // max { k : sum(k) <= a }; it requires b[k] >= 0
     int upper_bound(T a)
     {
-        int k = x.size()-1; 
-        for (int s: {1,2,4,8,16}) {
+        int k = x.size() - 1; 
+        for (int s: {1, 2, 4, 8, 16}) {
             k |= (k >> s);
         }
 

@@ -3,15 +3,15 @@
     Problem: https://www.spoj.com/problems/INVCNT/
 
     Solution Description
-    Using Divide and Conquer approach to calculate the number of inversions.
-    This algorithm is based on mergesort, so we split the array in two
-    (call them left and right) with equal number.
-    Suppose we know the number of inversions in both arrays. The number of total
-    inversions is calculated as:
+    Using Divide & Conquer approach to calculate the number of inversions.
+    This algorithm is based on Mergesort. The array is split into two equal
+    parts (left and right)
+    Suppose that the number of inversions in both arrays is known, the number
+    of total inversions is calculated as:
     invs = invs(left) + invs(right) + invs(merge(left, right))
     The number of inversions at each step in the merge process are:
     if a[i] > a[j], then there are (m – i) inversions.
-    Summing them together we have the number of inversions in the merge phase.
+    Summing them together we have the number of inversions.
 
     Time  Complexity: O(N log_2 N)
     Space Complexity: O(N)

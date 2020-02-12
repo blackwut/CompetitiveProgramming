@@ -1,6 +1,10 @@
+#pragma once
+
+#define DEBUG 0
+
 /**
     Author:  Alberto Ottimo
-    BST struct based
+    BST pointer based
 */
 
 #include <iostream>
@@ -386,7 +390,7 @@ void BST<T>::visit_BFS(const std::function<void (node<T> *)> & f, node<T> * n)
     }
 }
 
-
+#if DEBUG
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -457,3 +461,4 @@ int main()
 
     return 0;
 }
+#endif

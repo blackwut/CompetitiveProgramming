@@ -4,10 +4,10 @@
 
     Solution Description
     Sort the array of elements.
-    Count how many elements have the same value to determin the max height.
+    Count how many elements have the same value to determine the max height.
     Count how many distinct elements are in the array.
 
-    Time. Complexity: O(N log N)
+    Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
@@ -35,7 +35,7 @@ int main()
     int currentHeight = 0;
     int maxHeight = 1;
     int currentBar = 0;
-    int numBars= 0;
+    int numBars = 0;
 
     for (int i = 0; i < N; ++i) {
         const int bar = v[i];
@@ -43,9 +43,9 @@ int main()
         if (bar > currentBar) {
             currentBar = bar;
             currentHeight = 0;
-            numBars++;
+            ++numBars;
         }
-        currentHeight++;
+        ++currentHeight;
 
         if (currentHeight > maxHeight) {
             maxHeight = currentHeight;
