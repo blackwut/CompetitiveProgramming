@@ -26,6 +26,7 @@
 //   O(log n) access, n space.
 //
 
+#include <iostream>
 #include <vector>
 
 template <typename T>
@@ -60,6 +61,11 @@ struct BIT
         }
     }
 
+    void clear()
+    {
+        x.clear();
+    }
+
     // b[k] += a
     void add(int k, T a)
     {
@@ -69,7 +75,7 @@ struct BIT
     }
   
     // sum b[0,k)
-    T getSum(int k)
+    T sum(int k)
     {
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
@@ -81,7 +87,7 @@ struct BIT
     // sum b[l, r)
     T rangeSum(int l, int r)
     {
-        return getSum(r) - getSum(l - 1);
+        return sum(r) - sum(l - 1);
     }
 
     // min { k : sum(k) >= a }; it requires b[k] >= 0
@@ -122,5 +128,12 @@ struct BIT
             }
         }
         return k;
+    }
+
+    void print()
+    {
+        for (auto & v : x) {
+            std::cout << v << " ";
+        }
     }
 };

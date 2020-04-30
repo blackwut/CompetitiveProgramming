@@ -51,7 +51,7 @@ size_t BIT_inv(int * a, size_t n)
     BIT<int> b(n, 0);
 
     for (ssize_t i = n - 1; i >= 0; i--) {
-        invs += b.getSum(a[i] - 1); 
+        invs += b.sum(a[i] - 1); 
         b.add(a[i], 1); 
     }
     return invs;
