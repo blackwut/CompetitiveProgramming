@@ -3,7 +3,7 @@
     Problem: https://practice.geeksforgeeks.org/problems/missing-number-in-array/0
 
     Solution Description
-    Be sum = "prefix sum on the given array".
+    Be sum the prefix sum on the given array.
     Since the sum of numbers from 1 to N is totalSum = (N * (N + 1)) / 2
     hence the missingNumber = totalSum - sum
 
@@ -14,6 +14,7 @@
 #include <iostream>
 using namespace std;
 
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -22,16 +23,18 @@ int main()
     int T;
     cin >> T;
 
-    for (int i = 0; i < T; ++i) {
+    for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        const int totalSum = N * (N + 1) / 2;
+
         int sum = 0;
-        for (int j = 0; j < N - 1; ++j) {
+        for (int n = 0; n < N - 1; ++n) {
             int x;
             cin >> x;
             sum += x;
         }
+
+        const int totalSum = N * (N + 1) / 2;
         cout << totalSum - sum;
         cout << endl;
     }
