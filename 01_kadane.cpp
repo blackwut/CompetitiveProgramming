@@ -3,10 +3,11 @@
     Problem: https://practice.geeksforgeeks.org/problems/kadanes-algorithm/0
 
     Solution Description
-    Iterate the array and add the current element to sum if the sum is positive,
-    otherwise replace sum with the current element and go on iterating.
-    Compare the sum with the max, if the sum is larger, update max with sum.
-    The max value will be the maximum sum of a sub-array because:
+    Iterate the array, if the sum is positive, add the i-th element to sum,
+    otherwise replace sum with this element and go on iterating.
+    Then compare the sum with the max, if the sum is larger, update max with
+    sum.
+    The max value will be the maximum sum of a sub-array since:
     1. The sum of each prefix sub-array of the maximum sum is positive,
        otherwise the prefix sub-array could be removed
     2. The value of the element before the first element of the maximum sum
@@ -28,8 +29,9 @@ int kadane(vector<int> & v)
     for (auto i = v.begin() + 1; i != v.end(); ++i) {
         const int val = *i;
         sum = (sum > 0) ? sum + val : val;
-        if (sum > max)
+        if (sum > max){
             max = sum;
+        }
     }
 
     return max;
