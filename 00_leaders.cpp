@@ -18,7 +18,7 @@ vector<int> leaders(const vector<int> & v)
 {
     vector<int> result;
     int max = v.back();
-    result.push_back(max);  // The first element is always a leader
+    result.push_back(max);  // The last element is always a leader
 
     for (auto r = v.rbegin() + 1; r != v.rend(); ++r) {
         const int val = *r;
@@ -42,12 +42,11 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<int> v;
-        v.reserve(N);
+
+        vector<int> v(N);
+
         for (int n = 0; n < N; ++n) {
-            int x;
-            cin >> x;
-            v.push_back(x);
+            cin >> v[n];
         }
 
         vector<int> result = leaders(v);
