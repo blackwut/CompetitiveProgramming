@@ -21,7 +21,7 @@
 #include <vector>
 using namespace std;
 
-int kadane(vector<int> & v)
+int kadane(const vector<int> & v)
 {
     int sum = v.front();
     int max = sum;
@@ -29,7 +29,7 @@ int kadane(vector<int> & v)
     for (auto i = v.begin() + 1; i != v.end(); ++i) {
         const int val = *i;
         sum = (sum > 0) ? sum + val : val;
-        if (sum > max){
+        if (sum > max) {
             max = sum;
         }
     }
@@ -48,12 +48,11 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<int> v;
-        v.reserve(N);
+
+        vector<int> v(N);
+
         for (int n = 0; n < N; ++n) {
-            int x;
-            cin >> x;
-            v.push_back(x);
+            cin >> v[n];
         }
 
         int result = kadane(v);
