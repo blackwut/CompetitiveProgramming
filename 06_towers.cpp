@@ -23,23 +23,23 @@ int main()
 
     int N;
     cin >> N;
-    vector<int> v;
-    v.reserve(N);
+
+    vector<int> v(N);
+
     for (int n = 0; n < N; ++n) {
-        int x;
-        cin >> x;
-        v.push_back(x);
+        cin >> v[n];
     }
 
     sort(v.begin(), v.end());
+
     int currentHeight = 0;
-    int maxHeight = 1;
+    int maxHeight = 0;
     int currentBar = 0;
     int numBars = 0;
 
     for (int i = 0; i < N; ++i) {
         const int bar = v[i];
-        
+
         if (bar > currentBar) {
             currentBar = bar;
             currentHeight = 0;
