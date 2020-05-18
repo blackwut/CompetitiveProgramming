@@ -5,12 +5,12 @@
     Solution Description
     This solution make use of a double ended queue that stores indices of the
     elements inside the current window, "sorted" by element value.
-    Each time an index `i` is pushed to the back of the queue, all indices
-    referring to elements smaller than the one pointed by `i` are removed
-    from back.
+    Each time an index i is pushed to the back of the queue, all indices
+    referring to elements smaller than the one pointed by i are removed from
+    back.
     Each time the window moves, all the indices outside the window are removed
     from front.
-    In this way all the elements in the queue are only the right-leader of the
+    In this way all the elements in the queue are only the right-leaders of the
     current window.
     For each window, the element pointed by the front index in the queue is
     stored in a vector.
@@ -67,17 +67,16 @@ int main()
         int K;
         cin >> N;
         cin >> K;
-        vector<int> v;
-        v.reserve(N);
+
+        vector<int> v(N);
+
         for (int n = 0; n < N; ++n) {
-            int x;
-            cin >> x;
-            v.push_back(x);
+            cin >> v[n];
         }
 
         vector<int> result = maxsSubarray(v, K);
-        for (auto i = result.begin(); i != result.end(); ++i) {
-            cout << *i << " ";
+        for (const auto & i : result) {
+            cout << i << " ";
         }
         cout << endl;
 
