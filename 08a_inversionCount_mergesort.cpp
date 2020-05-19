@@ -1,26 +1,33 @@
 /**
     Author:  Alberto Ottimo
     Problem: https://www.spoj.com/problems/INVCNT/
+    Compiler: C++ (gcc 8.3), C++14 (gcc 8.3), C++14 (clang 8.0)
 
     Solution Description
     Using Divide & Conquer approach to calculate the number of inversions.
-    This algorithm is based on Mergesort. The array is split into two equal
+    This algorithm is based on Mergesort. The vector is split into two equal
     parts (left and right)
     Suppose that the number of inversions in both arrays is known, the number
     of total inversions is calculated as:
     invs = invs(left) + invs(right) + invs(merge(left, right))
     The number of inversions at each step in the merge process are:
-    if a[i] > a[j], then there are (m – i) inversions.
+    if v[i] > v[j] there are (m – i) inversions.
     Summing them together we have the number of inversions.
 
-    Time  Complexity: O(N log_2 N)
+    Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
+#include <vector>
+
 using namespace std;
 
-size_t _merge_inv(int * a, int * tmp, size_t l, size_t m, size_t r)
+size_t _merge_inv(vector<int> & v,
+                  vector<int> & tmp,
+                  const size_t l,
+                  const size_t m,
+                  const size_t r)
 {
     size_t invs = 0;
     size_t i = l;
@@ -28,47 +35,51 @@ size_t _merge_inv(int * a, int * tmp, size_t l, size_t m, size_t r)
     size_t k = l;
 
     while ( (i < m) && (j < r) ){
-        if (a[i] <= a[j]) {
-            tmp[k++] = a[i++];
+        if (v[i] <= v[j]) {
+            tmp[k++] = v[i++];
         } else {
-            tmp[k++] = a[j++];
+            tmp[k++] = v[j++];
             invs += (m - i);
         }
     }
 
     while (i < m) {
-        tmp[k++] = a[i++];
+        tmp[k++] = v[i++];
     }
 
     while (j < r) {
-        tmp[k++] = a[j++];
+        tmp[k++] = v[j++];
     }
 
     for (k = l; k < r; ++k) {
-        a[k] = tmp[k];
+        v[k] = tmp[k];
     }
 
     return invs;
 }
 
-size_t _mergesort_inv(int * a, int * tmp, size_t l, size_t r)
+size_t _mergesort_inv(vector<int> & v,
+                      vector<int> & tmp,
+                      const size_t l,
+                      const size_t r)
 {
     size_t invs = 0;
+
     if (l < r) {
-        size_t m = l + (r - l) / 2;
-        invs  = _mergesort_inv(a, tmp, l, m);
-        invs += _mergesort_inv(a, tmp, m + 1, r);
-        invs += _merge_inv(a, tmp, l, m + 1, r + 1);
+        const size_t m = l + (r - l) / 2;
+        invs  = _mergesort_inv(v, tmp, l, m);
+        invs += _mergesort_inv(v, tmp, m + 1, r);
+        invs += _merge_inv(v, tmp, l, m + 1, r + 1);
     }
+
     return invs;
 }
 
-size_t mergesort_inv(int * a, size_t n)
+size_t mergesort_inv(vector<int> & v,
+                     const size_t n)
 {
-    int * tmp = (int *)malloc(n * sizeof(int));
-    size_t invs = _mergesort_inv(a, tmp, 0, n - 1);
-    free(tmp);
-    return invs;
+    vector<int> tmp(v);
+    return _mergesort_inv(v, tmp, 0, n - 1);
 }
 
 int main()
@@ -83,16 +94,17 @@ int main()
         int N;
         cin >> N;
 
-        int * a = (int *)malloc(N * sizeof(int));
+        vector<int> v(N);
+
         for (int n = 0; n < N; ++n) {
-            cin >> a[n];
+            cin >> v[n];
         }
 
-        size_t result = mergesort_inv(a, N);
+        const size_t result = mergesort_inv(v, N);
         cout << result;
         cout << endl;
 
-        free(a);
+        v.clear();
     }
 
     return 0;
