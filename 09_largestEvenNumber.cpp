@@ -4,19 +4,22 @@
 
     Solution Description
     The solution is a modification of the counting sort. It is enough to count
-    the number of occurrences.
+    the number of occurrences of each digit.
     Find the minimum even number (or odd number in case no even number found)
     and subtract 1 from the number of occurrences associated to it.
-    Then start iterate from the last digit and print it "occurrences" times.
+    Then start iterate from the greatest digit and print it "occurrences" times.
     Finally print the minimum number found.
 
-    Time  Complexity: O(N) where N is the number of digits of the number P
+    Time  Complexity: O(N)
     Space Complexity: O(1)
+
+    Where N is the number of digits of the number P
 */
 
 #include <iostream>
 #include <string>
 #include <vector>
+
 using namespace std;
 
 int main()
@@ -31,33 +34,32 @@ int main()
         string P;
         cin >> P;
 
-        // Count the occurrences of each digit
-        size_t occurences[10] = {0};
-        for (char & c : P) {
+        // count the occurrences of each digit
+        int occurences[10] = {0};
+        for (const char & c : P) {
             occurences[c - '0']++;
         }
 
-        // Find the minimum among odd digits in case an even digit is not found
-        size_t min = 11;
-        for (ssize_t i = 9; i >= 0; i -= 2) {
+        // find the minimum among odd digits in case an even digit is not found
+        int min = 11;
+        for (int i = 9; i >= 0; i -= 2) {
             if (occurences[i] > 0) {
                 min = i;
             }
         }
 
-        // Find the minimum among even digits
-        for (ssize_t i = 8; i >= 0; i -= 2) {
+        // find the minimum among even digits
+        for (int i = 8; i >= 0; i -= 2) {
             if (occurences[i] > 0) {
                 min = i;
             }
         }
 
-        // Decrement the occurrence of the minimum digit found
+        // decrement the occurrence of the minimum digit found
         occurences[min]--;
 
-        // Print the solution
-        for (ssize_t i = 9; i >= 0; --i) {
-            for (size_t j = 0; j < occurences[i]; ++j) {
+        for (int i = 9; i >= 0; --i) {
+            for (int j = 0; j < occurences[i]; ++j) {
                 cout << i;
             }
         }
