@@ -1,7 +1,6 @@
 /**
     Author:  Alberto Ottimo
     Problem: https://codeforces.com/problemset/problem/313/B?locale=en
-    Compiler: GNU G++17 7.3.0
 
     Solution Description
     Construct an array such as:
@@ -30,11 +29,11 @@ int main()
     string s;
     cin >> s;
 
-    size_t len = s.length();
-    vector<size_t> sums(len);
+    int n = s.length();
+    vector<int> sums(n);
     sums[0] = 0;
 
-    for (size_t i = 1; i < len; ++i) {
+    for (int i = 1; i < n; ++i) {
         sums[i] = sums[i - 1] + (s[i - 1] == s[i] ? 1 : 0);
     }
 

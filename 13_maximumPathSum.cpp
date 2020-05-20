@@ -3,7 +3,6 @@
     Problem: https://practice.geeksforgeeks.org/problems/maximum-path-sum/1
 
     Solution Description
-    
     Let be maxL the maximum sum of a path toward a leaf in the left subtree, and
     maxR the maximum sum of a path toward a leaf in the right subtree.
 
