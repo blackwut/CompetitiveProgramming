@@ -3,10 +3,12 @@
     Problem: https://practice.geeksforgeeks.org/problems/firing-employees/0/
 
     Solution Description
-    TODO: complete
+    For each employee calculate the number of seniors.
+    Then count the number of employees whose rank and the number of his/her
+    seniors is a prime number.
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time  Complexity: O(N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
@@ -16,13 +18,15 @@ using namespace std;
 
 #define PRIMES_COUNT (200000)
 
-
-vector<bool> createPrimes()
+vector<bool> createPrimes(int max)
 {
-    vector<bool> primes(PRIMES_COUNT, true);
-    for (int p = 2; p * p <= PRIMES_COUNT; ++p) {
-        if (primes[p]) {                                     // if primes[p] is not changed, then it is a prime
-            for (int i = p * p; i <= PRIMES_COUNT; i += p) { // update all multiples of p greater that are >= p^2 and less then n
+    vector<bool> primes(max, true);
+    primes[0] = false;
+    primes[1] = false;
+
+    for (int p = 2; p * p <= max; ++p) {
+        if (primes[p]) {
+            for (int i = p * p; i <= max; i += p) {
                 primes[i] = false;
             }
         }
@@ -31,11 +35,12 @@ vector<bool> createPrimes()
     return primes;
 }
 
-int firingEmployees(const vector<int> & v, const vector<bool> & primes)
+int firingEmployees(const vector<int> & v,
+                    const vector<bool> & primes)
 {
     const int n = v.size();
 
-    // add the position of each employee to his senior's list
+    // add each employee's rank to his senior list
     vector< vector<int> > ranks(n + 1, vector<int>());
     for (int i = 0; i < n; ++i) {
         ranks[v[i]].push_back(i + 1);
@@ -44,13 +49,13 @@ int firingEmployees(const vector<int> & v, const vector<bool> & primes)
     vector<int> seniors(n + 1, 0);
     stack<int> s;
 
-    // calculate the number of seniors
-    s.push(ranks[0].front());
+    // for each employee calculate the number of seniors
+    s.push(ranks[0].front()); // Mr. Alfred
     for (int i = 0; i < n; ++i) {
-        vector<int> & subordinates = ranks[s.top()];
+        const auto subordinates = ranks[s.top()];
         s.pop();
-        for (int sub : subordinates) {
-            seniors[sub] = 1 + seniors[v[sub - 1]];
+        for (const int & sub : subordinates) {
+            seniors[sub] = seniors[v[sub - 1]] + 1;
             s.push(sub);
         }
     }
@@ -70,7 +75,7 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    vector<bool> primes = createPrimes();
+    const vector<bool> primes = createPrimes(PRIMES_COUNT);
 
     int T;
     cin >> T;
@@ -78,15 +83,14 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<int> v;
-        v.reserve(N);
+
+        vector<int> v(N);
+
         for (int n = 0; n < N; ++n) {
-            int x;
-            cin >> x;
-            v.push_back(x);
+            cin >> v[n];
         }
 
-        int result = firingEmployees(v, primes);
+        const int result = firingEmployees(v, primes);
         cout << result;
         cout << endl;
 
