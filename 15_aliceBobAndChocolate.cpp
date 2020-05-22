@@ -3,33 +3,21 @@
     Problem: https://codeforces.com/problemset/problem/6/C?locale=en
 
     Solution Description
-    TODO: complete
-    TODO: doesnt work
+    Iterate from both sides the vector, Alice from the left and Bob from the right.
+    At each iteration, accumulate the time spent to eat and the number of bars
+    ate from both.
+    Advance from left if Alice has spent less time than Bob, otherwise advance
+    from right. In case of tie, Alice has the priority over Bob.
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time  Complexity: O(N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
 #include <vector>
 #include <numeric>
+
 using namespace std;
-
-int eat_chocolate(const vector<int> & v)
-{
-    const int n = v.size();
-    const int total = accumulate(v.begin(), v.end(), 0);
-    int sum = 0;
-    int i = 0;
-    while (i < n && sum < (total - sum)) {
-        sum += v[i++];
-    }
-
-    if (i != 0 && sum < (total - sum)) {
-        --i;
-    }
-    return i;
-}
 
 int main()
 {
@@ -38,16 +26,34 @@ int main()
 
     int N;
     cin >> N;
-    vector<int> v;
-    v.reserve(N);
+
+    vector<int> v(N);
+
     for (int n = 0; n < N; ++n) {
-        int x;
-        cin >> x;
-        v.push_back(x);
+        cin >> v[n];
     }
 
-    int result = eat_chocolate(v);
-    cout << result << " " << (N - result);
+    int aliceTime = 0;
+    int aliceBars = 0;
+    int bobTime   = 0;
+    int bobBars   = 0;
+
+    auto left  = v.begin();
+    auto right = v.end() - 1;
+
+    while (left <= right) {
+        if (aliceTime <= bobTime) {
+            aliceTime += *left;
+            ++aliceBars;
+            ++left;
+        } else {
+            bobTime += *right;
+            ++bobBars;
+            --right;
+        }
+    }
+
+    cout << aliceBars << " " << bobBars;
     cout << endl;
 
     v.clear();
