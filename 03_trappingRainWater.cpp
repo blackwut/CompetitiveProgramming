@@ -34,10 +34,10 @@ using namespace std;
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-int trappingRainWater(const std::vector<int> & vec)
+int trappingRainWater(const std::vector<int> & v)
 {
-    auto left  = vec.begin();
-    auto right = vec.end() - 1;
+    auto left  = v.begin();
+    auto right = v.end() - 1;
 
     int water = 0;
     int max = 0;
