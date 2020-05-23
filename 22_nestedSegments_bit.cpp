@@ -7,17 +7,17 @@
     Sort segments <l_i, r_i> in decreasing order by l_i.
     Make use of a BIT (Binary Index Tree) to keep track, using the rank as
     index, of the already visited segments. For each segment processed, add 1 to
-    the BIT at its rank, then get the sum up to its r_i, that is the number of
-    contained segments.
+    the BIT at its rank, then get the sum from 0 to to its r_i, that is the
+    number of nested segments.
 
     Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <tuple>
-#include <algorithm>
 
 using namespace std;
 
