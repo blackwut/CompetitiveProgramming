@@ -61,7 +61,6 @@ int main()
             cout << endl;
             break;
         }
-        
     }
 
     if (S < ONE_MILLION) {
