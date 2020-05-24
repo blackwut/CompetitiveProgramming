@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+
 using namespace std;
 
 void solution(const vector<int> & v)
