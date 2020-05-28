@@ -10,14 +10,13 @@
 */
 
 #include <iostream>
+#include <algorithm>
 #include <vector>
 
 using namespace std;
 
-void solution(const vector<int> & v)
+int solution(const vector<int> & v)
 {
-    // auto i = v.begin();
-    // auto r = v.rbegin();
 }
 
 int main()
