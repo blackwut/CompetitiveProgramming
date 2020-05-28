@@ -1,5 +1,5 @@
 CXX			= g++
-CXXFLAGS	= -std=c++17 -O3 -Wall -pedantic
+CXXFLAGS	= -std=c++11 -O3 -Wall -pedantic
 INCLUDES	= -I. -I./Structures
 
 %:%.cpp
