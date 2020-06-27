@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <functional>
 
@@ -11,10 +12,10 @@ struct SegmentTree
 private:
     int n;
     vector<T> tree;
-    function<T(const T &, const T &)> op;
-    T id;
 
 public:
+    function<T(const T &, const T &)> op;
+    T id;
 
     SegmentTree(function<T(const T &, const T &)> binaryOperation,
                 const T identityValue)
@@ -27,7 +28,7 @@ public:
         n = size;
         tree.resize(2 * n, id);
         for(int i = 0; i < n; ++i) {
-            tree[n + 1] = val;
+            tree[n + i] = val;
         }
 
         for (int i = n - 1; i > 0; --i) {
@@ -40,7 +41,7 @@ public:
         n = v.size();
         tree.resize(2 * n, id);
         for(int i = 0; i < n; ++i) {
-            tree[n + 1] = v[i];
+            tree[n + i] = v[i];
         }
 
         for (int i = n - 1; i > 0; --i) {
@@ -48,7 +49,16 @@ public:
         }
     }
 
-    void update(int pos, T delta)
+    void update(int pos, T val)
+    {
+        tree[n + pos] = val;
+
+        for (int i = pos + n; i > 1; i >>= 1) {
+            tree[i >> 1] = op(tree[i], tree[i ^ 1]);
+        }
+    }
+
+    void updateDelta(int pos, T delta)
     {
         tree[n + pos] += delta;
 
@@ -68,5 +78,14 @@ public:
             if (r & 1) result = op(result, tree[--r]);
         }
         return result;
+    }
+
+    void print()
+    {
+        cout << "SegmentTree" << endl;
+        for (const auto & v : tree) {
+            cout << v << " ";
+        }
+        cout << endl;
     }
 };
