@@ -3,8 +3,9 @@
     Problem: https://practice.geeksforgeeks.org/problems/leaders-in-an-array/0
 
     Solution Description
-    Iterate the array backward, checking if the i-th element is greater than
-    the max. If it is true, update the max and consider this element a leader.
+    Iterate the array backwards, if the i-th element is greater than max, update
+    consider this element a leader and the new max.
+    The last element is always a leader.
 
     Time  Complexity: O(N)
     Space Complexity: O(N)
@@ -18,7 +19,7 @@ vector<int> leaders(const vector<int> & v)
 {
     vector<int> result;
     int max = v.back();
-    result.push_back(max);  // The last element is always a leader
+    result.push_back(max);
 
     for (auto r = v.rbegin() + 1; r != v.rend(); ++r) {
         const int val = *r;
@@ -44,7 +45,6 @@ int main()
         cin >> N;
 
         vector<int> v(N);
-
         for (int n = 0; n < N; ++n) {
             cin >> v[n];
         }
@@ -53,7 +53,7 @@ int main()
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << " ";
         }
-        cout << endl;
+        cout << '\n';
 
         result.clear();
         v.clear();
