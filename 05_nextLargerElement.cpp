@@ -3,14 +3,14 @@
     Problem: https://practice.geeksforgeeks.org/problems/next-larger-element/0
 
     Solution Description
-    Iterating in the reverse way the provided elements. Make use of a stack to
-    keep elements larger than the current one.
-    For each element, iterate over the stack to find the first element greater
+    Iterate the array backwards. Make use of a stack to keep elements larger
+    than the current one.
+    For each element, iterate over the stack to find the first element larger
     than the current one, removing all elements that are smaller.
-    If no element is greater than the current one, the value -1 is stored in the
-    result vector.
+    If the element is found, it is stored in the result vector, otherwise it is
+    stored the value -1.
     Then the current element is pushed into the stack.
-    The solution is provided iterating in the reverse way the result vector.
+    The solution is provided printing the result vector backwards.
 
     Time  Complexity: O(N)
     Space Complexity: O(N)
@@ -58,16 +58,15 @@ int main()
         cin >> N;
 
         vector<int64_t> v(N);
-
         for (int n = 0; n < N; ++n) {
             cin >> v[n];
         }
 
         vector<int64_t> result = nextLargerElement(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
-            cout << *r << " ";
+            cout << *r << ' ';
         }
-        cout << endl;
+        cout << '\n';
 
         result.clear();
         v.clear();

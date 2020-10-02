@@ -15,12 +15,19 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 #include <cmath>
-
 using namespace std;
 
 #define ONE_MILLION     (1000000)
 
+struct Location
+{
+    int64_t d;
+    int p;
+
+    inline bool operator<(const Location & rhs) const { return d < rhs.d; };
+};
 
 int main()
 {
@@ -32,8 +39,7 @@ int main()
     cin >> N;
     cin >> S;
 
-    vector< pair<int64_t, int> > v(N);
-
+    vector<Location> v(N);
     for (int n = 0; n < N; ++n) {
         int x;
         int y;
@@ -43,29 +49,22 @@ int main()
         cin >> y;
         cin >> p;
 
-        v[n].first = x * x + y * y;
-        v[n].second = p;
+        v[n].d = x * x + y * y;
+        v[n].p = p;
     }
 
-    sort(v.begin(), v.end(),
-        [](const pair<int64_t, int> & a, const pair<int64_t, int> & b) {
-            return a.first < b.first;
-        }
-    );
+    sort(v.begin(), v.end());
 
     for (const auto & l : v) {
-        S += l.second;
+        S += l.p;
         if (S >= ONE_MILLION) {
-            cout.precision(8);
-            cout << sqrt(l.first);
-            cout << endl;
+            cout << setprecision(8) << sqrt(l.d) << '\n';
             break;
         }
     }
 
     if (S < ONE_MILLION) {
-        cout << -1;
-        cout << endl;
+        cout << -1 << '\n';
     }
 
     v.clear();

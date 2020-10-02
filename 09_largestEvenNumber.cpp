@@ -8,7 +8,7 @@
     Find the minimum even number (or odd number in case no even number found)
     and subtract 1 from the number of occurrences associated to it.
     Then start iterate from the greatest digit and print it "occurrences" times.
-    Finally print the minimum number found.
+    Finally, print the minimum number found.
 
     Time  Complexity: O(N)
     Space Complexity: O(1)
@@ -35,7 +35,7 @@ int main()
         cin >> P;
 
         // count the occurrences of each digit
-        int occurences[10] = {0};
+        vector<int> occurences(10, 0);
         for (const char & c : P) {
             occurences[c - '0']++;
         }
@@ -55,7 +55,7 @@ int main()
             }
         }
 
-        // decrement the occurrence of the minimum digit found
+        // decrement the occurrences of the minimum digit found
         occurences[min]--;
 
         for (int i = 9; i >= 0; --i) {
@@ -63,8 +63,7 @@ int main()
                 cout << i;
             }
         }
-        cout << min;
-        cout << endl;
+        cout << min << '\n';
     }
 
     return 0;

@@ -5,14 +5,15 @@
 
     Solution Description
     Using Divide & Conquer approach to calculate the number of inversions.
-    This algorithm is based on Mergesort. The vector is split into two equal
-    parts (left and right)
-    Suppose that the number of inversions in both arrays is known, the number
-    of total inversions is calculated as:
+    This algorithm is based on Merge-Sort.
+    The array is split into two equal parts (left and right). Suppose that the
+    number of inversions in both arrays is known, the number of total inversions
+    is calculated as:
     invs = invs(left) + invs(right) + invs(merge(left, right))
-    The number of inversions at each step in the merge process are:
-    if v[i] > v[j] there are (m – i) inversions.
-    Summing them together we have the number of inversions.
+    In the merge process, if v[i] > v[j], there are (m - i) inversions, where i
+    and j are the index of the two merged arrays and m is the index in the
+    middle.
+    Summing up all the inversions, we have the total number of inversions.
 
     Time  Complexity: O(N log N)
     Space Complexity: O(N)
@@ -20,7 +21,6 @@
 
 #include <iostream>
 #include <vector>
-
 using namespace std;
 
 size_t _merge_inv(vector<int> & v,
@@ -34,7 +34,7 @@ size_t _merge_inv(vector<int> & v,
     size_t j = m;
     size_t k = l;
 
-    while ( (i < m) && (j < r) ){
+    while ( (i < m) and (j < r) ){
         if (v[i] <= v[j]) {
             tmp[k++] = v[i++];
         } else {
@@ -95,14 +95,11 @@ int main()
         cin >> N;
 
         vector<int> v(N);
-
         for (int n = 0; n < N; ++n) {
             cin >> v[n];
         }
 
-        const size_t result = mergesort_inv(v, N);
-        cout << result;
-        cout << endl;
+        cout << mergesort_inv(v, N) << '\n';
 
         v.clear();
     }

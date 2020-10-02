@@ -7,11 +7,10 @@
     - a[0] = 0;
     - a[i] = 1 iff input[i - 1] = input[i], otherwise 0
 
-    Prefix sum over the previous array to make query in constant time.
-
+    Prefix sum over the previous array to make each query in constant time.
     Query in the form [l, r] solved with (sums[r - 1] - sums[l - 1])
 
-    Time  Complexity: O(1)
+    Time  Complexity: O(N) preprocessing O(1) query time
     Space Complexity: O(N)
 */
 
@@ -29,12 +28,12 @@ int main()
     string s;
     cin >> s;
 
-    int n = s.length();
+    const int n = s.length();
     vector<int> sums(n);
-    sums[0] = 0;
 
+    sums[0] = 0;
     for (int i = 1; i < n; ++i) {
-        sums[i] = sums[i - 1] + (s[i - 1] == s[i] ? 1 : 0);
+        sums[i] = sums[i - 1] + (s[i - 1] == s[i]);
     }
 
     int T;
@@ -45,7 +44,7 @@ int main()
         int r;
         cin >> l;
         cin >> r;
-        cout << sums[r - 1] - sums[l - 1] << endl;
+        cout << sums[r - 1] - sums[l - 1] << '\n';
     }
 
     sums.clear();

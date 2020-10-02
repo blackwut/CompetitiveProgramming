@@ -16,23 +16,23 @@
 
     It is simple to solve the problem in a recursive way.
     Base Cases:
-    - if the node is NULL, it returns 1 (true) since it is not a node of the BST
+    - if the node is NULL, it returns 1 (true)
     - if the data node is outside the range [min, max] it returns 0 (false)
 
     Recursion:
-    Call the function to the left and the right node.
+    Call the function to the left and to the right node.
     For the left node the min is the previous min, the max is the data node.
     For the right node the min is the data node, the max is the previous max.
 
     Time  Complexity: O(N)
-    Space Complexity: O(1)
+    Space Complexity: O(Height of the BST)
 */
 
 int isBSTUtil(struct Node* node, int min, int max)
 {
     if (node == NULL) return 1;
-    if (node->data < min || node->data > max) return 0;
-    return isBSTUtil(node->left, min, node->data) && isBSTUtil(node->right, node->data, max);
+    if (node->data <= min || node->data >= max) return 0;
+    return isBSTUtil(node->left, min, node->data) and isBSTUtil(node->right, node->data, max);
 }
 
 bool isBST(Node* root)

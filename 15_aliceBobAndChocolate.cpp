@@ -3,9 +3,9 @@
     Problem: https://codeforces.com/problemset/problem/6/C?locale=en
 
     Solution Description
-    Iterate from both sides the vector, Alice from the left and Bob from the right.
+    Iterate from both sides, Alice from the left and Bob from the right.
     At each iteration, accumulate the time spent to eat and the number of bars
-    ate from both.
+    ate by both.
     Advance from left if Alice has spent less time than Bob, otherwise advance
     from right. In case of tie, Alice has the priority over Bob.
 
@@ -15,8 +15,6 @@
 
 #include <iostream>
 #include <vector>
-#include <numeric>
-
 using namespace std;
 
 int main()
@@ -28,7 +26,6 @@ int main()
     cin >> N;
 
     vector<int> v(N);
-
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
@@ -53,8 +50,7 @@ int main()
         }
     }
 
-    cout << aliceBars << " " << bobBars;
-    cout << endl;
+    cout << aliceBars << " " << bobBars << '\n';
 
     v.clear();
 

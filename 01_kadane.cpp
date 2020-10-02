@@ -4,38 +4,22 @@
 
     Solution Description
     Iterate the array, if the sum is positive, add the i-th element to sum,
-    otherwise replace sum with this element and go on iterating.
-    Then compare the sum with the max, if the sum is larger, update max with
-    sum.
-    The max value will be the maximum sum of a sub-array since:
+    otherwise replace sum with this element. Then compare the sum with max, if
+    it is larger, update max with it.
+
+    The max value will be the maximum sum of a sub-array, since:
     1. The sum of each prefix sub-array of the maximum sum is positive,
        otherwise the prefix sub-array could be removed
     2. The value of the element before the first element of the maximum sum
        sub-array is negative
 
     Time  Complexity: O(N)
-    Space Complexity: O(N)
+    Space Complexity: O(1)
 */
 
 #include <iostream>
 #include <vector>
 using namespace std;
-
-int kadane(const vector<int> & v)
-{
-    int sum = v.front();
-    int max = sum;
-
-    for (auto i = v.begin() + 1; i != v.end(); ++i) {
-        const int val = *i;
-        sum = (sum > 0) ? sum + val : val;
-        if (sum > max) {
-            max = sum;
-        }
-    }
-
-    return max;
-}
 
 int main()
 {
@@ -49,17 +33,18 @@ int main()
         int N;
         cin >> N;
 
-        vector<int> v(N);
-
-        for (int n = 0; n < N; ++n) {
-            cin >> v[n];
+        int val;
+        cin >> val;
+        
+        int sum = val;
+        int max = val;
+        for (int n = 1; n < N; ++n) {
+            cin >> val;
+            sum = (sum > 0) ? sum + val : val;
+            max = sum > max ? sum : max;
         }
 
-        int result = kadane(v);
-        cout << result;
-        cout << endl;
-
-        v.clear();
+        cout << max << '\n';
     }
 
     return 0;

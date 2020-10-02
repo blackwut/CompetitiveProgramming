@@ -10,14 +10,13 @@
     pair is <a_i, a_j> where i is calculated as before, and
     j = (K - 1 - l * N) / r.
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time  Complexity: O(N log N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-
+#include <algorithm>
 using namespace std;
 
 
@@ -32,7 +31,6 @@ int main()
     cin >> K;
 
     vector<int> v(N);
-
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
@@ -43,7 +41,7 @@ int main()
     const int first = v[i];
 
     uint64_t l = 0;  // number of values less than first
-    for(l = 0; l < N; ++l){
+    for(l = 0; l < N; ++l) {
         if(v[l] == first) break;
     }
 
@@ -54,7 +52,7 @@ int main()
 
     const uint64_t j = (K - 1 - l * N) / r;
     const int second = v[j];
-    cout << first << " " << second << endl;
+    cout << first << " " << second << '\n';
 
     v.clear();
 

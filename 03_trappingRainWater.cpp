@@ -6,18 +6,18 @@
     For each elevation point i, calculate the maximum elevation on its left
     [0...i] and do the same to the right [i...n]. Call them lMax and rMax
     respectively.
-    The trapped water in the elevation point i with height H_i is:
+    The trapped water at the elevation point i with height H_i is:
     water = min(lMax, rMax) - H_i
     The total trapped water is obtained summing up the water of each point.
 
     Observing that the trapped water cannot be more than the minimum between the
     left and the right maximum, the computation can be improved using two
-    indices. One starting from the left side, that is increased when the
-    elevation is less than the right one. One starting from the right side that
-    is decremented when the elevation is less than the left one.
+    indices: one starting from the left side, that is incremented when the
+    elevation is less than the right one; the other starting from the right side
+    that is decremented when the elevation is less than the left one.
     At each iteration, if the left elevation is less than the right one,
     calculate the maximum between the current elevation and the previous max.
-    Then compute the value of water as before (water = max - H_i), and finally
+    Then compute the value of water as (water = max - H_i), and finally
     increment the left index.
     If the right elevation is less than the left one, calculate the maximum
     between the current elevation and the previous max, calculate the value of
@@ -73,14 +73,12 @@ int main()
         cin >> N;
 
         vector<int> v(N);
-
         for (int n = 0; n < N; ++n) {
             cin >> v[n];
         }
 
-        int result = trappingRainWater(v);
-        cout << result;
-        cout << endl;
+        const int result = trappingRainWater(v);
+        cout << result << '\n';
 
         v.clear();
     }

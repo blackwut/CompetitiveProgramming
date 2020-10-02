@@ -4,11 +4,11 @@
 
     Solution Description
     Let be total the sum of the values in the vector. If total is not divisible
-    by 3, then there are 0 ways to split the vector in three parts. Otherwise
-    compute the vector c which stores at each position the number of suffixes
-    that sum up to total/3. Then scan the vector keeping the sum up to the
-    current value at position i. If this sum is equal to total/3, add c[i + 2]
-    to the result.
+    by 3, then there are 0 ways to split the vector in three parts.
+    Otherwise compute the vector c which stores at each position the number of
+    suffixes that sum up to total/3.
+    Then scan the vector keeping the sum up to the current i-th value. If this
+    sum is equal to total/3, add c[i + 2] to the result.
 
     Time  Complexity: O(N)
     Space Complexity: O(N)
@@ -16,7 +16,6 @@
 
 #include <iostream>
 #include <vector>
-
 using namespace std;
 
 int main()
@@ -28,7 +27,6 @@ int main()
     cin >> N;
 
     vector<int> v(N);
-
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
@@ -44,11 +42,11 @@ int main()
         return 0;
     }
 
+
     total = total / 3;
 
-    vector<int> c(N);
     int64_t sum = 0;
-
+    vector<int> c(N);
     for (int n = N - 1; n >= 0; --n) {
         sum += v[n];
         if (sum == total) {
@@ -69,8 +67,7 @@ int main()
         }
     }
 
-    cout << result;
-    cout << endl;
+    cout << result << '\n';
 
     v.clear();
 

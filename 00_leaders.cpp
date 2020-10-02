@@ -51,7 +51,7 @@ int main()
 
         vector<int> result = leaders(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
-            cout << *r << " ";
+            cout << *r << ' ';
         }
         cout << '\n';
 

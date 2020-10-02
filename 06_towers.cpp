@@ -3,17 +3,18 @@
     Problem: http://codeforces.com/problemset/problem/37/A?locale=en
 
     Solution Description
-    Sort the array of elements.
-    Count how many elements have the same value to determine the max height.
-    Count how many distinct elements are in the array.
+    Sort the array.
+    The largest tower is determined counting how many bars have the same length.
+    The minimal number of towers is determined counting how many distinct bars
+    there are.
 
     Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
-#include <algorithm> 
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 int main()
@@ -25,37 +26,33 @@ int main()
     cin >> N;
 
     vector<int> v(N);
-
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
 
     sort(v.begin(), v.end());
 
-    int currentHeight = 0;
-    int maxHeight = 0;
-    int currentBar = 0;
+    int h = 0;
+    int hMax = 0;
+    int barMax = 0;
     int numBars = 0;
 
     for (int i = 0; i < N; ++i) {
         const int bar = v[i];
 
-        if (bar > currentBar) {
-            currentBar = bar;
-            currentHeight = 0;
+        if (bar > barMax) {
+            barMax = bar;
+            h = 0;
             ++numBars;
         }
-        ++currentHeight;
+        ++h;
 
-        if (currentHeight > maxHeight) {
-            maxHeight = currentHeight;
+        if (h > hMax) {
+            hMax = h;
         }
     }
 
-    cout << maxHeight;
-    cout << " ";
-    cout << numBars;
-    cout << endl;
+    cout << hMax << ' ' << numBars << '\n';
 
     v.clear();
 

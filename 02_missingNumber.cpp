@@ -3,9 +3,9 @@
     Problem: https://practice.geeksforgeeks.org/problems/missing-number-in-array/0
 
     Solution Description
-    Be sum the prefix sum on the given array.
-    Since the sum of numbers from 1 to N is totalSum = (N * (N + 1)) / 2
-    hence the missingNumber = totalSum - sum
+    Let S be the sum of all elements in the array.
+    Since the sum of numbers from 1 to N is totalSum = (N * (N + 1)) / 2, hence
+    the missingNumber = totalSum - S.
 
     Time  Complexity: O(N)
     Space Complexity: O(1)
@@ -28,14 +28,13 @@ int main()
 
         int sum = 0;
         for (int n = 0; n < N - 1; ++n) {
-            int x;
-            cin >> x;
-            sum += x;
+            int val;
+            cin >> val;
+            sum += val;
         }
 
         const int totalSum = N * (N + 1) / 2;
-        cout << totalSum - sum;
-        cout << endl;
+        cout << (totalSum - sum) << '\n';
     }
 
     return 0;

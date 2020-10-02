@@ -22,7 +22,6 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
 using namespace std;
 
 int main()
@@ -36,12 +35,11 @@ int main()
     cin >> Q;
 
     vector<int> v(N);
-    vector<int> f(N + 1);
-
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
 
+    vector<int64_t> f(N + 1);
     for (int q = 0; q < Q; ++q) {
         int l;
         int r;
@@ -60,11 +58,10 @@ int main()
 
     int64_t result = 0;
     for (int n = 0; n < N; ++n) {
-        result += static_cast<int64_t>(v[n]) * f[n];
+        result += v[n] * f[n];
     }
 
-    cout << result;
-    cout << endl;
+    cout << result << '\n';
 
     v.clear();
     f.clear();

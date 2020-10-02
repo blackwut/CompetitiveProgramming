@@ -18,13 +18,12 @@
     Space Complexity: O(N)
 
     BIT Solution
-    Time  Complexity: O(N log U + Q)
+    Time  Complexity: O((U + Q) * log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
 #include <vector>
-
 using namespace std;
 
 #define ARRAY_SOLUTION 0
@@ -75,47 +74,14 @@ int main()
 }
 
 #else // BIT solution
-
-#define SUBMIT_ONLINE 1
-#if !SUBMIT_ONLINE
-#include "Structures/BIT.hpp"
-#else
 template <typename T>
 struct BIT
 {
     std::vector<T> x;
 
-    BIT(size_t n) :
-    x(n + 1)
+    BIT(size_t n)
+    : x(n + 1)
     {}
-
-    // initialize by a constant
-    BIT(size_t n, T a) :
-    x(n + 1, a)
-    {
-        x[0] = 0;
-        for (int k = 1; k + (k & -k) <= n; ++k) {
-            x[k + (k & -k)] += x[k];
-        }
-    }
-
-    // initialize by a std::vector
-    BIT(std::vector<T> y) :
-    x(y.size() + 1)
-    {
-        for (int k = 0; k < y.size(); ++k) {
-            x[k + 1] = y[k];
-        }
-
-        for (int k = 1; k + (k & -k) < x.size(); ++k) {
-            x[k + (k & -k)] += x[k];
-        }
-    }
-
-    void clear()
-    {
-        x.clear();
-    }
 
     // b[k] += a
     void add(int k, T a)
@@ -135,60 +101,11 @@ struct BIT
         return s;
     }
 
-    // sum b[l, r)
-    T rangeSum(int l, int r)
+    void clear()
     {
-        return sum(r) - sum(l - 1);
-    }
-
-    // min { k : sum(k) >= a }; it requires b[k] >= 0
-    int lower_bound(T a)
-    {
-        if (a <= 0) {
-            return 0;
-        }
-
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] < a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k + 1;
-    }
-
-    // max { k : sum(k) <= a }; it requires b[k] >= 0
-    int upper_bound(T a)
-    {
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] <= a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k;
-    }
-
-    void print()
-    {
-        for (auto & v : x) {
-            std::cout << v << " ";
-        }
+        x.clear();
     }
 };
-#endif
 
 int main()
 {
@@ -203,8 +120,8 @@ int main()
         int U;
         cin >> N;
         cin >> U;
-        BIT<int> b(N);
 
+        BIT<int> b(N);
         for (int u = 0; u < U; ++u) {
             int l;
             int r;
@@ -221,7 +138,7 @@ int main()
         for (int q = 0; q < Q; ++q) {
             int i;
             cin >> i;
-            cout << b.sum(i) << endl;
+            cout << b.sum(i) << '\n';
         }
 
         b.clear();
