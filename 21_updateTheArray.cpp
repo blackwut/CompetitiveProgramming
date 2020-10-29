@@ -3,18 +3,18 @@
     Problem: https://www.spoj.com/problems/UPDATEIT/
 
     Solution Description
-    Let be L and R the left position and the right position respectively of the
-    range [L, R] (both included) where we update the array with the value V.
+    Let be L and R respectively the left position and the right position of the
+    range [L, R] (both included) where we update the array with the value v.
     Create an array with N + 1 elements with value 0.
-    Each update can be made adding V at position L and -V at position R + 1.
+    Each update is made by adding v at position L and -v at position R + 1.
     Then prefix sum the array.
-    Each query can be found in constant time getting the value at the requested
+    Each query is computed in constant time getting the value at the requested
     position.
 
     The previous solution can be solved similarly with Binary Index Tree (BIT).
 
     Array Solution
-    Time  Complexity: O(N + Q)
+    Time  Complexity: O(U + Q)
     Space Complexity: O(N)
 
     BIT Solution
@@ -26,7 +26,7 @@
 #include <vector>
 using namespace std;
 
-#define ARRAY_SOLUTION 0
+#define ARRAY_SOLUTION 1
 #if ARRAY_SOLUTION
 
 int main()
@@ -42,8 +42,8 @@ int main()
         int U;
         cin >> N;
         cin >> U;
-        vector<int> b(N + 1);
 
+        vector<int> b(N + 1);
         for (int u = 0; u < U; ++u) {
             int l;
             int r;
@@ -64,46 +64,41 @@ int main()
         for (int q = 0; q < Q; ++q) {
             int i;
             cin >> i;
-            cout << b[i] << endl;
+            cout << b[i] << '\n';
         }
-
-        b.clear();
     }
 
     return 0;
 }
 
 #else // BIT solution
+
 template <typename T>
 struct BIT
 {
-    std::vector<T> x;
+    vector<T> b;
 
-    BIT(size_t n)
-    : x(n + 1)
-    {}
+    void resize(size_t n, const T a) {
+        b.resize(n + 1, a);
+    }
 
-    // b[k] += a
-    void add(int k, T a)
-    {
-        for (++k; k < x.size(); k += k & -k) {
-            x[k] += a;
+    void increment(int k, T a) { // b[k] += a
+        const int n = static_cast<int>(b.size());
+        for (++k; k < n; k += k & -k) {
+            b[k] += a;
         }
     }
-  
-    // sum b[0,k)
-    T sum(int k)
-    {
+
+    T query(int k) { // sum in the range [0, k)
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
-            s += x[k];
+            s += b[k];
         }
         return s;
     }
 
-    void clear()
-    {
-        x.clear();
+    void clear() {
+        b.clear();
     }
 };
 
@@ -111,6 +106,9 @@ int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
+
+    BIT<int> b;
+    b.reserve(10000);
 
     int T;
     cin >> T;
@@ -121,7 +119,7 @@ int main()
         cin >> N;
         cin >> U;
 
-        BIT<int> b(N);
+        b.resize(N, 0);
         for (int u = 0; u < U; ++u) {
             int l;
             int r;
@@ -129,8 +127,8 @@ int main()
             cin >> l;
             cin >> r;
             cin >> v;
-            b.add(l, v);
-            b.add(r + 1, -v);
+            b.increment(l, v);
+            b.increment(r + 1, -v);
         }
 
         int Q;
@@ -138,7 +136,7 @@ int main()
         for (int q = 0; q < Q; ++q) {
             int i;
             cin >> i;
-            cout << b.sum(i) << '\n';
+            cout << b.query(i) << '\n';
         }
 
         b.clear();

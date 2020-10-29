@@ -35,7 +35,7 @@ int main()
 
         int val;
         cin >> val;
-        
+
         int sum = val;
         int max = val;
         for (int n = 1; n < N; ++n) {

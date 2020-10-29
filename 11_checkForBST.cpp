@@ -32,7 +32,9 @@ int isBSTUtil(struct Node* node, int min, int max)
 {
     if (node == NULL) return 1;
     if (node->data <= min || node->data >= max) return 0;
-    return isBSTUtil(node->left, min, node->data) and isBSTUtil(node->right, node->data, max);
+    return isBSTUtil(node->left, min, node->data)
+           and
+           isBSTUtil(node->right, node->data, max);
 }
 
 bool isBST(Node* root)

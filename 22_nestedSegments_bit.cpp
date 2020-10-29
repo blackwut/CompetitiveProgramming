@@ -3,144 +3,56 @@
     Problem: https://codeforces.com/problemset/problem/652/D
 
     Solution Description
-    Sort the segments <l_i, r_i> by r_i and calculate the rank of each segment.
-    Sort segments <l_i, r_i> in decreasing order by l_i.
-    Make use of a BIT (Binary Index Tree) to keep track, using the rank as
-    index, of the already visited segments. For each segment processed, add 1 to
-    the BIT at its rank, then get the sum from 0 to to its r_i, that is the
-    number of nested segments.
+    The i-th segment is stored as a tuple <l_i, r_i, i>.
+    Sort the segments by r_i and replace r_i with its rank.
+    Sort again the segments in decreasing order by l_i.
+    Make use of a BIT (Binary Index Tree) to keep track of the already visited
+    segments. For each segment processed:
+    - add 1 at position r_i to the BIT
+    - then get the sum in the range [0, r_i), that represents the number of
+      nested segments
 
     Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-#include <tuple>
-
+#include <algorithm>
 using namespace std;
 
-#define SUBMIT_ONLINE 1
-#if !SUBMIT_ONLINE
-#include "Structures/BIT.hpp"
-#else
 template <typename T>
 struct BIT
 {
-    std::vector<T> x;
+    // Inspired by https://github.com/spaghetti-source/algorithm/blob/master/data_structure/fenwick_tree.cc
+    vector<T> b;
 
-    BIT(size_t n) :
-    x(n + 1)
+    BIT(size_t n)
+    : b(n + 1)
     {}
 
-    // initialize by a constant
-    BIT(size_t n, T a) :
-    x(n + 1, a)
-    {
-        x[0] = 0;
-        for (int k = 1; k + (k & -k) <= n; ++k) {
-            x[k + (k & -k)] += x[k];
+    void increment(int k, T a) { // b[k] += a
+        const int n = static_cast<int>(b.size());
+        for (++k; k < n; k += k & -k) {
+            b[k] += a;
         }
     }
 
-    // initialize by a std::vector
-    BIT(std::vector<T> y) :
-    x(y.size() + 1)
-    {
-        for (int k = 0; k < y.size(); ++k) {
-            x[k + 1] = y[k];
-        }
-
-        for (int k = 1; k + (k & -k) < x.size(); ++k) {
-            x[k + (k & -k)] += x[k];
-        }
-    }
-
-    void clear()
-    {
-        x.clear();
-    }
-
-    // b[k] += a
-    void add(int k, T a)
-    {
-        for (++k; k < x.size(); k += k & -k) {
-            x[k] += a;
-        }
-    }
-  
-    // sum b[0,k)
-    T sum(int k)
-    {
+    T query(int k) { // sum in the range [0, k)
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
-            s += x[k];
+            s += b[k];
         }
         return s;
     }
-
-    // sum b[l, r)
-    T rangeSum(int l, int r)
-    {
-        return sum(r) - sum(l - 1);
-    }
-
-    // min { k : sum(k) >= a }; it requires b[k] >= 0
-    int lower_bound(T a)
-    {
-        if (a <= 0) {
-            return 0;
-        }
-
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] < a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k + 1;
-    }
-
-    // max { k : sum(k) <= a }; it requires b[k] >= 0
-    int upper_bound(T a)
-    {
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] <= a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k;
-    }
-
-    void print()
-    {
-        for (auto & v : x) {
-            std::cout << v << " ";
-        }
-    }
 };
-#endif
 
-
-//            tuple<left, right, rank>
-#define RANGE tuple<int, int, int>
-#define LEFT    0
-#define RIGHT   1
-#define RANK    2
+struct Seg
+{
+    int l;
+    int r;
+    int i;
+};
 
 int main()
 {
@@ -150,49 +62,34 @@ int main()
     int N;
     cin >> N;
 
-    vector< RANGE > v(N);
-    BIT<int> b(N);
-    vector<int> results(N);
-
+    vector<Seg> v(N);
     for (int n = 0; n < N; ++n) {
-        int left;
-        int right;
-        cin >> left;
-        cin >> right;
-        v[n] = make_tuple(left, right, n);
+        cin >> v[n].l;
+        cin >> v[n].r;
+        v[n].i = n;
     }
 
-    // sort by right in increasing order
-    sort(v.begin(), v.end(),
-        [](const RANGE & lhs, const RANGE & rhs) {
-            return get<RIGHT>(lhs) < get<RIGHT>(rhs);
-        });
-
-    // tuple<left, sorted_rank_right, rank>
+    // sort by right in increasing order and replace r_i with its rank
+    auto compR = [](const Seg & lhs, const Seg & rhs) { return lhs.r < rhs.r; };
+    sort(v.begin(), v.end(), compR);
     for (int n = 0; n < N; ++n) {
-        get<RIGHT>(v[n]) = n;
+        v[n].r = n;
     }
 
     // sort by left in decreasing order
-    sort(v.begin(), v.end(),
-        [](const RANGE & lhs, const RANGE & rhs) {
-            return get<LEFT>(lhs) > get<LEFT>(rhs);
-        });
+    auto compL = [](const Seg & lhs, const Seg & rhs) { return lhs.l > rhs.l; };
+    sort(v.begin(), v.end(), compL);
 
+    BIT<int> b(N);
+    vector<int> result(N);
     for (int n = 0; n < N; ++n) {
-        const int right = get<RIGHT>(v[n]);
-        const int rank = get<RANK>(v[n]);
-        results[rank] = b.sum(right);
-        b.add(right, 1);
+        result[v[n].i] = b.query(v[n].r);
+        b.increment(v[n].r, 1);
     }
 
     for (int n = 0; n < N; ++n) {
-        cout << results[n] << endl;
+        cout << result[n] << '\n';
     }
-
-    results.clear();
-    b.clear();
-    v.clear();
 
     return 0;
 }

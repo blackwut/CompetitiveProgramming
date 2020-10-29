@@ -3,8 +3,8 @@
     Problem: https://practice.geeksforgeeks.org/problems/largest-even-number/0
 
     Solution Description
-    The solution is a modification of the counting sort. It is enough to count
-    the number of occurrences of each digit.
+    The solution is based on the counting sort.
+    Count the number of occurrences of each digit.
     Find the minimum even number (or odd number in case no even number found)
     and subtract 1 from the number of occurrences associated to it.
     Then start iterate from the greatest digit and print it "occurrences" times.
@@ -19,7 +19,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
 using namespace std;
 
 int main()

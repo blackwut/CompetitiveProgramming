@@ -54,7 +54,5 @@ int main()
 
     cout << hMax << ' ' << numBars << '\n';
 
-    v.clear();
-
     return 0;
 }

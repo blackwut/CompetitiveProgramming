@@ -3,8 +3,16 @@
     Problem: https://practice.geeksforgeeks.org/problems/preorder-traversal-and-bst/0
 
     Solution Description
-    https://www.geeksforgeeks.org/check-if-a-given-array-can-represent-preorder-traversal-of-binary-search-tree/
-    
+    In the pre-order traversal of BST, each root of any subtree is processed
+    before any of its child nodes.
+    Create an empty stack and set the root as -INF (e.g. INT_MIN).
+    Iterate the provided array:
+    - if the current element is smaller than root, return false
+    - otherwise remove elements smaller than the current element and update the
+      root with it
+    - finally, push the current node into the stack.
+    If the first condition is never false, the provided array represents a
+    pre-order traversal of a BST.
 
     Time  Complexity: O(N)
     Space Complexity: O(N)
@@ -16,21 +24,18 @@
 #include <limits>
 using namespace std;
 
-int preorderTraversal(const vector<int> & v)
+template <typename T>
+int preorderTraversal(const vector<T> & v)
 {
-    int root = numeric_limits<int>::min();
-    stack<int> s;
+    T root = numeric_limits<T>::min();
+    stack<T> s;
 
-    for (int & x : v) {
-        if (x < root) return 0; 
-
-        // keep removing all nodes smaller than current one
-        // and make the last removed item as new root
-        while (!s.empty() && s.top() < x) {
+    for (const auto & x : v) {
+        if (x < root) return 0;
+        while (!s.empty() and s.top() < x) {
             root = s.top();
             s.pop();
         }
-
         s.push(x);
     }
 
@@ -48,19 +53,13 @@ int main()
     for (int t = 0; t < T; ++t) {
         int N;
         cin >> N;
-        vector<int> v;
-        v.reserve(N);
+
+        vector<int> v(N);
         for (int n = 0; n < N; ++n) {
-            int x;
-            cin >> x;
-            v.push_back(x);
+            cin >> v[n];
         }
 
-        int result = preorderTraversal(v);
-        cout << result;
-        cout << endl;
-
-        v.clear();
+        cout << preorderTraversal(v) << '\n';
     }
 
     return 0;

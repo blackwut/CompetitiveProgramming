@@ -26,15 +26,15 @@ int main()
         int N;
         cin >> N;
 
-        int sum = 0;
+        int S = 0;
         for (int n = 0; n < N - 1; ++n) {
             int val;
             cin >> val;
-            sum += val;
+            S += val;
         }
 
         const int totalSum = N * (N + 1) / 2;
-        cout << (totalSum - sum) << '\n';
+        cout << (totalSum - S) << '\n';
     }
 
     return 0;

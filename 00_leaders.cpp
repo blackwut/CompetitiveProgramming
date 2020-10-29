@@ -3,7 +3,7 @@
     Problem: https://practice.geeksforgeeks.org/problems/leaders-in-an-array/0
 
     Solution Description
-    Iterate the array backwards, if the i-th element is greater than max, update
+    Iterate the array backwards, if the i-th element is greater than max,
     consider this element a leader and the new max.
     The last element is always a leader.
 
@@ -15,14 +15,15 @@
 #include <vector>
 using namespace std;
 
-vector<int> leaders(const vector<int> & v)
+template <T>
+vector<T> leaders(const vector<T> & v)
 {
-    vector<int> result;
-    int max = v.back();
+    vector<T> result;
+    T max = v.back();
     result.push_back(max);
 
     for (auto r = v.rbegin() + 1; r != v.rend(); ++r) {
-        const int val = *r;
+        const T val = *r;
         if (val >= max) {
             max = val;
             result.push_back(val);
@@ -49,14 +50,11 @@ int main()
             cin >> v[n];
         }
 
-        vector<int> result = leaders(v);
+        const auto result = leaders(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << ' ';
         }
         cout << '\n';
-
-        result.clear();
-        v.clear();
     }
 
     return 0;

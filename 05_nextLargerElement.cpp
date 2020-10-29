@@ -21,16 +21,17 @@
 #include <stack>
 using namespace std;
 
-vector<int64_t> nextLargerElement(const vector<int64_t> & v)
+template <typename T>
+vector<T> nextLargerElement(const vector<T> & v)
 {
-    vector<int64_t> result;
+    vector<T> result;
     result.reserve(v.size());
-    stack<int64_t> s;
+    stack<T> s;
 
     for (auto i = v.rbegin(); i != v.rend(); ++i) {
-        int64_t r = -1;
+        T r = -1;
         while (!s.empty()) {
-            const int64_t val = s.top();
+            const T val = s.top();
             if (val > *i) {
                 r = val;
                 break;
@@ -62,14 +63,11 @@ int main()
             cin >> v[n];
         }
 
-        vector<int64_t> result = nextLargerElement(v);
+        const auto result = nextLargerElement(v);
         for (auto r = result.rbegin(); r != result.rend(); ++r) {
             cout << *r << ' ';
         }
         cout << '\n';
-
-        result.clear();
-        v.clear();
     }
 
     return 0;

@@ -19,7 +19,6 @@
 #include <algorithm>
 using namespace std;
 
-
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -41,20 +40,19 @@ int main()
     const int first = v[i];
 
     uint64_t l = 0;  // number of values less than first
-    for(l = 0; l < N; ++l) {
-        if(v[l] == first) break;
+    for (l = 0; l < N; ++l) {
+        if (v[l] == first) break;
     }
 
     uint64_t r = 0;  // number of values equal to first
-    for (int n = l; n < N; ++n, ++r) {
-        if (v[n] != first) break;
+    for (r = l; r < N; ++r) {
+        if (v[r] != first) break;
     }
+    r -= l;
 
     const uint64_t j = (K - 1 - l * N) / r;
     const int second = v[j];
-    cout << first << " " << second << '\n';
-
-    v.clear();
+    cout << first << ' ' << second << '\n';
 
     return 0;
 }

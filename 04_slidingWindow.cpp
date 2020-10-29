@@ -6,7 +6,7 @@
     This solution make use of a double ended queue that stores indices of the
     elements inside the current window, "sorted" by element value.
     Each time the window moves, elements no longer in the window are removed.
-    Then, the new index i is pushed to the back of the queue and all indices
+    Then, the new index is pushed to the back of the queue and all indices
     referring to elements smaller than the new element are removed from the
     back of the queue.
     In this way all the elements in the queue are only the right-leaders of the
@@ -23,11 +23,12 @@
 #include <deque>
 using namespace std;
 
-vector<int> maxsSubarray(const vector<int> & v, int K)
+template <typename T>
+vector<T> maxsSubarray(const vector<T> & v, int K)
 {
-    vector<int> result;
+    vector<T> result;
     result.reserve(v.size() - K + 1);
-    std::deque<int> d;
+    std::deque<T> d;
 
     for (int i = 0; i < v.size(); ++i) {
         // Removes elements no longer in the window
@@ -71,14 +72,11 @@ int main()
             cin >> v[n];
         }
 
-        vector<int> result = maxsSubarray(v, K);
+        const auto result = maxsSubarray(v, K);
         for (const auto & i : result) {
             cout << i << ' ';
         }
         cout << '\n';
-
-        result.clear();
-        v.clear();
     }
 
     return 0;

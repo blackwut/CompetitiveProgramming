@@ -30,8 +30,24 @@ struct Team
     , s(s)
     {}
 
-    inline bool operator<(const Team & rhs) const { return s > rhs.s; };
+    inline bool operator<(const Team & rhs) const { return s < rhs.s; };
 };
+
+vector<int> findTeamMembers(vector<Team> & v, int N)
+{
+    sort(v.rbegin(), v.rend());
+
+    vector<int> teammates(2 * N);
+    for (const Team & t: v) {
+        // if both teammates are not in a team
+        if (teammates[t.i] == 0 and teammates[t.j] == 0) {
+            teammates[t.i] = t.j + 1; // store the id of its teammate j
+            teammates[t.j] = t.i + 1; // store the id of its teammate i
+        }
+    }
+
+    return teammates;
+}
 
 int main()
 {
@@ -42,7 +58,7 @@ int main()
     cin >> N;
 
     vector<Team> teams;
-    teams.reserve( N * (N - 1) / 2 );
+    teams.reserve(N * (N - 1) / 2);
     for (int i = 0; i < (2 * N); ++i) {
         for (int j = 0; j < i; ++j) {
             int s;
@@ -51,24 +67,11 @@ int main()
         }
     }
 
-    sort(teams.begin(), teams.end());
-
-    vector<int> teammates( 2 * N );
-    for(const Team & t: teams) {
-        // if both teammates are not in a team
-        if(teammates[t.i] == 0 and teammates[t.j] == 0) {
-            teammates[t.i] = t.j + 1; // store the id of its teammate j
-            teammates[t.j] = t.i + 1; // store the id of its teammate i
-        }
-    }
-
-    for (const auto & i : teammates) {
+    const auto result = findTeamMembers(teams, N);
+    for (const auto & i : result) {
         cout << i << ' ';
     }
     cout << '\n';
-
-    teammates.clear();
-    teams.clear();
 
     return 0;
 }

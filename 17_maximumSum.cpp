@@ -63,8 +63,5 @@ int main()
 
     cout << result << '\n';
 
-    v.clear();
-    f.clear();
-
     return 0;
 }

@@ -37,11 +37,9 @@ int main()
     }
 
     if (total % 3) {
-        cout << 0 << endl;
-        v.clear();
+        cout << 0 << '\n';
         return 0;
     }
-
 
     total = total / 3;
 
@@ -68,8 +66,6 @@ int main()
     }
 
     cout << result << '\n';
-
-    v.clear();
 
     return 0;
 }

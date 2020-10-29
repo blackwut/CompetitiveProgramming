@@ -19,8 +19,6 @@
 #include <cmath>
 using namespace std;
 
-#define ONE_MILLION     (1000000)
-
 struct Location
 {
     int64_t d;
@@ -57,17 +55,13 @@ int main()
 
     for (const auto & l : v) {
         S += l.p;
-        if (S >= ONE_MILLION) {
+        if (S >= 1000000) {
             cout << setprecision(8) << sqrt(l.d) << '\n';
-            break;
+            return 0;
         }
     }
 
-    if (S < ONE_MILLION) {
-        cout << -1 << '\n';
-    }
-
-    v.clear();
+    cout << -1 << '\n';
 
     return 0;
 }

@@ -19,21 +19,28 @@ using namespace std;
 
 class Solution {
 public:
-    bool isPrime(int n)
-    {
-        if (n <= 1) return false;
-        if (n == 2) return true;
 
-        const int sqrtn = sqrt(n);
-        for (int i = 2; i <= sqrtn; ++i) {
-            if (n % i == 0) return false;
+    vector<bool> createPrimes(int max)
+    {
+        vector<bool> primes(max, true);
+        primes[0] = false;
+        primes[1] = false;
+
+        for (int p = 2; p * p <= max; ++p) {
+            if (primes[p]) {
+                for (int i = p * p; i <= max; i += p) {
+                    primes[i] = false;
+                }
+            }
         }
-        return true;
+
+        return primes;
     }
 
     int firingEmployees(const vector<int> & v,  int n)
     {
-        vector<int> ranks[n + 1];
+        vector< vector<int> > ranks;
+        ranks.resize(n + 1);
         for (int i = 0; i < n; ++i) {
             ranks[v[i]].push_back(i + 1);
         }
@@ -52,9 +59,10 @@ public:
             }
         }
 
+        const auto is_prime = createPrimes(2 * n + 1);
         int result = 0;
         for (int i = 1; i <= n; ++i) {
-            if (seniors[i] &&  isPrime(seniors[i] + i)) {
+            if (seniors[i] &&  is_prime[seniors[i] + i]) {
                 ++result;
             }
         }
@@ -82,8 +90,6 @@ int main()
 
         Solution sol;
         cout << sol.firingEmployees(v, N) << '\n';
-
-        v.clear();
     }
 
     return 0;

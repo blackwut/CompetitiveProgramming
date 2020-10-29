@@ -50,9 +50,7 @@ int main()
         }
     }
 
-    cout << aliceBars << " " << bobBars << '\n';
-
-    v.clear();
+    cout << aliceBars << ' ' << bobBars << '\n';
 
     return 0;
 }
