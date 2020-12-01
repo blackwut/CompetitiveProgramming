@@ -10,9 +10,8 @@
 */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-
+#include <algorithm>
 using namespace std;
 
 int solution(const vector<int> & v)
@@ -37,11 +36,7 @@ int main()
             cin >> v[n];
         }
 
-        int result = solution(v);
-        cout << result;
-        cout << endl;
-
-        v.clear();
+        cout << solution(v) << '\n';
     }
 
     return 0;
