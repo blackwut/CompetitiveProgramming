@@ -1,3 +1,45 @@
+#pragma once
+#include <vector>
+
+/*
+    Inspired by https://sites.google.com/site/indy256/algo/heavy_light
+
+    // Create an operator, a subclass of the HLD and instantiate the subclass
+    template <typename T>
+    struct Operator
+    {
+        static T op(const T & a, const T & b) { return a < b ? a : b; };
+        static const T id = numeric_limits<T>::max();
+    };
+    ...
+    template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
+    struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
+
+        using super = HLD<T, op, id, valuesOnNodes>;
+        SegmentTree<T, op, id> st;
+
+        T query(int u, int v) {
+            T ans = 0;
+            super::path_query(u, v, [&](const int u, const int v) {
+                ans += st.query(u, v);
+                return id;
+            });
+            return ans;
+        }
+        ...
+    }
+    ...
+    HLD_ext<int, Operator<int>::op, Operator<int>::id, true> hld;
+*/
+
+template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
+struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
+
+    using super = HLD<T, op, id, valuesOnNodes>;
+
+    SegmentTree<T, op, id> st;
+    BIT<T> b;
+
 template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
 struct HLD
 {
