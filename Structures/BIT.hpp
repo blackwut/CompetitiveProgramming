@@ -28,112 +28,70 @@
 
 #include <iostream>
 #include <vector>
+using namespace std;
 
 template <typename T>
 struct BIT
 {
-    std::vector<T> x;
+    vector<T> b;
 
-    BIT(size_t n) :
-    x(n + 1)
+    BIT() = default;
+
+    BIT(int n)
+    : b(n + 1)
     {}
 
-    // initialize by a constant
-    BIT(size_t n, T a) :
-    x(n + 1, a)
+    BIT(int n, T a)
+    : b(n + 1, a)
     {
-        x[0] = 0;
+        build(n);
+    }
+
+    BIT(const vector<T> v)
+    : b(v.size() + 1)
+    {
+        const int n = v.size();
+        for (int k = 0; k < n; ++k) {
+            b[k + 1] = v[k];
+        }
+        build(n);
+    }
+
+    void build(int n) {
+        b[0] = 0;
         for (int k = 1; k + (k & -k) <= n; ++k) {
-            x[k + (k & -k)] += x[k];
+            b[k + (k & -k)] += b[k];
         }
     }
 
-    // initialize by a std::vector
-    BIT(std::vector<T> y) :
-    x(y.size() + 1)
-    {
-        for (int k = 0; k < y.size(); ++k) {
-            x[k + 1] = y[k];
-        }
-
-        for (int k = 1; k + (k & -k) < x.size(); ++k) {
-            x[k + (k & -k)] += x[k];
+    void increment(int k, T a) { // b[k] += a
+        const int n = b.size();
+        for (++k; k < n; k += k & -k) {
+            b[k] += a;
         }
     }
 
-    void clear()
-    {
-        x.clear();
-    }
-
-    // b[k] += a
-    void add(int k, T a)
-    {
-        for (++k; k < x.size(); k += k & -k) {
-            x[k] += a;
-        }
-    }
-  
-    // sum b[0,k)
-    T sum(int k)
-    {
+    T query(int k) { // sum in the range [0, k)
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
-            s += x[k];
+            s += b[k];
         }
         return s;
     }
 
-    // sum b[l, r)
-    T rangeSum(int l, int r)
-    {
-        return sum(r) - sum(l - 1);
+    T query(int l, int r) { // sum in range [l, r)
+        return query(r) - query(l - 1);
     }
 
-    // min { k : sum(k) >= a }; it requires b[k] >= 0
-    int lower_bound(T a)
-    {
-        if (a <= 0) {
-            return 0;
-        }
-
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] < a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k + 1;
+    void reserve(int n) {
+        b.reserve(n + 1);
     }
 
-    // max { k : sum(k) <= a }; it requires b[k] >= 0
-    int upper_bound(T a)
-    {
-        int k = x.size() - 1; 
-        for (int s: {1, 2, 4, 8, 16}) {
-            k |= (k >> s);
-        }
-
-        for (int p = ++k; p > 0; p >>= 1, k |= p) {
-            if (k < x.size() && x[k] <= a) {
-                a -= x[k];
-            } else {
-                k ^= p;
-            }
-        }
-        return k;
+    void resize(int n, const T a) {
+        b.resize(n + 1, a);
     }
 
-    void print()
-    {
-        for (auto & v : x) {
-            std::cout << v << " ";
-        }
+    void clear() {
+        b.clear();
     }
 };

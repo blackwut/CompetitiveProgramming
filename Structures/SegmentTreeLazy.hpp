@@ -1,145 +1,136 @@
-#include <functional>
+#pragma once
 #include <vector>
-#include <cmath>
 
-using namespace std;
+/*
+    Inspired by https://codeforces.com/blog/entry/18051
 
-#define LEFT(i)     ((i << 1) + 1)
-#define RIGHT(i)    ((i << 1) + 2)
-#define PARENT(i)   ((i - 1) >> 1)
+    Example usage:
+        template <typename T>
+        struct Operator
+        {
+            static T op(const T & a, const T & b) { return a < b ? a : b; };
+            static const T id = numeric_limits<T>::max();
+        };
+        ...
+        SegmentTree<int, Operator<int>::op, Operator<int>::id> st;
+*/
 
-template<typename T>
-struct SegmentTreeLazy
+template<typename T, T (op)(const T &, const T &), T id>
+struct SegmentTree
 {
-private:
-    size_t n;
+    int n;
+    int h;
     vector<T> tree;
     vector<T> lazy;
-    function<T(const T &, const T &)> op;
-    T id;
 
-    void build(const vector<T> & v, size_t l, size_t r, size_t i)
-    {
-        // out of range
-        if (l > r) return;
-
-        // leaf
-        if (l == r) {
-            tree[i] = v[l];
-            return;
-        }
-
-        const size_t m = l + (r - l) / 2;
-        build(v, l, m, LEFT(i));
-        build(v, m + 1, r, RIGHT(i));
-
-        tree[i] = op(tree[LEFT(i)], tree[RIGHT(i)]);
+    // Build with constant value v
+    void build(int s, const T v) {
+        n = s;
+        h = sizeof(int) * 8 - __builtin_clz(n);
+        tree.resize(2 * n, v);
+        lazy.resize(n, 0);
+        build();
     }
 
-    void updateRangeUtil(size_t i, size_t l, size_t r, size_t ul, size_t ur, T diff)
-    {
-        if (lazy[i] != 0) {
-
-            tree[i] += lazy[i];
-
-            if (l != r) {
-                lazy[LEFT(i)]  += lazy[i];
-                lazy[RIGHT(i)] += lazy[i];
-            }
-
-            lazy[i] = 0;
-        } 
-
-        // out of range
-        if (l > r || l > ur || r < ul) return;
-
-        // total overlap
-        if (l >= ul && r <= ur) {
-
-            tree[i] += diff;
-
-            if (l != r) {
-                lazy[LEFT(i)]  += diff;
-                lazy[RIGHT(i)] += diff;
-            }
-
-            return;
-        }
-
-        // partial overlap
-        const size_t m = l + (r - l) / 2;
-        updateRangeUtil(LEFT(i),  l,       m, ul, ur, diff);
-        updateRangeUtil(RIGHT(i), m + 1, r,   ul, ur, diff);
-        tree[i] = op(tree[LEFT(i)], tree[RIGHT(i)]);
-    }
-
-    T query(size_t l, size_t r, size_t ql, size_t qr, size_t i)
-    {
-        if (lazy[i] != 0) {
-
-            tree[i] += lazy[i]; 
-
-            if (l != r) {
-                lazy[LEFT(i)]  += lazy[i];
-                lazy[RIGHT(i)] += lazy[i];
-            }
-            lazy[i] = 0;
-        } 
-
-        // out of range
-        if (l > r || l > qr || r < ql) return id;
-
-        // total overlap
-        if (l >= ql && r <= qr) return tree[i];
-
-        // partial overlap
-        const size_t m = l + (r - l) / 2;
-        return op(query(l,     m, ql, qr, LEFT(i)),
-                  query(m + 1, r, ql, qr, RIGHT(i))
-               );
-    }
-
-    size_t nextPowerOfTwo(size_t v)
-    {
-        return size_t(1) << static_cast<size_t>(ceil(log2(v)));
-    }
-
-public:
-
-    SegmentTreeLazy(function<T(const T &, const T &)> binaryOperation,
-                    const T identityValue)
-    : op(binaryOperation),
-      id(identityValue)
-    {}
-
-    ~SegmentTreeLazy() { tree.clear(); lazy.clear(); }
-
-
-    void build(const vector<T> & v)
-    {
+    // Build from a given vector
+    void build(const vector<T> & v) {
         n = v.size();
-        const size_t nn = nextPowerOfTwo(n);
-        tree.resize(2 * nn - 1, id);
-        lazy.resize(2 * nn - 1, 0);
-
-        build(v, 0, n - 1, 0);
-    }
-
-    void updateRange(size_t l, size_t r, T diff) 
-    {
-        updateRangeUtil(0, 0, n - 1, l, r, diff);
-    }
-
-    T query(size_t l, size_t r) 
-    {
-        return query(0, n - 1, l, r, 0);
-    }
-
-    void print()
-    {
-        for (const auto & x : tree) {
-            cout << x << " ";
+        h = sizeof(int) * 8 - __builtin_clz(n);
+        tree.resize(2 * n, id);
+        lazy.resize(n, 0);
+        for (int i = 0; i < n; ++i) {
+            tree[n + i] = v[i];
         }
-        cout << endl;
+        build();
+    }
+
+    // Build after manual initialization of values
+    void build() {
+        for (int i = n - 1; i > 0; --i) {
+            tree[i] = op(tree[i << 1], tree[i << 1 | 1]);
+        }
+    }
+
+    // Update all the parents of a given node
+    void build(int p) {
+        while (p > 1) {
+            p >>= 1;
+            tree[p] = op(tree[p << 1], tree[p << 1 | 1]) + lazy[p];
+        }
+    }
+
+    // Helper function
+    void apply(int p, const T v) {
+        tree[p] += v;
+        if (p < n) lazy[p] += v;
+    }
+
+    // Propagates changes from all the parents of a given node down the tree
+    // Parents are exactly the prefixes of p in binary notation
+    void push(int p) {
+        for (int s = h; s > 0; --s) {
+            int i = p >> s;
+            if (lazy[i] != 0) {
+                apply(i << 1, lazy[i]);
+                apply(i << 1 | 1, lazy[i]);
+                lazy[i] = 0;
+            }
+        }
+    }
+
+    // Change the value of a single element
+    void change(int p, const T v) {
+        for (tree[p += n] = v; p > 1; p >>= 1) {
+            tree[p >> 1] = op(tree[p], tree[p ^ 1]);
+        }
+    }
+
+    // Add v to elements in the range [l, r)
+    void increment(int l, int r, const T v) {
+        l += n;
+        r += n;
+        int l0 = l;
+        int r0 = r;
+        for (; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) apply(l++, v);
+            if (r & 1) apply(--r, v);
+        }
+        build(l0);
+        build(r0 - 1);
+    }
+
+    // Query on range [l, r)
+    T query(int l, int r) {
+        l += n;
+        r += n;
+        push(l);
+        push(r - 1);
+        T resl = id;
+        T resr = id;
+        for (; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) resl = op(resl, tree[l++]);
+            if (r & 1) resr = op(tree[--r], resr);
+        }
+        return op(resl, resr);
+    }
+
+    // Using reserve() can prevent unnecessary reallocations
+    void reserve(int n) {
+        tree.reserve(2 * n);
+        lazy.reserve(n);
+    }
+
+    // Resize the Segment Tree with a constant value
+    void resize(int n, const T a = id) {
+        tree.resize(2 * n, a);
+        lazy.resize(n);
+    }
+
+    // Remove all elements
+    void clear() {
+        n = 0;
+        h = 0;
+        tree.clear();
+        lazy.clear();
     }
 };
