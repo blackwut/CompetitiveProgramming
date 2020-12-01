@@ -7,8 +7,8 @@
     subtree (i.e. L_i is the index of v_i itself, R_i is the index of the
     right-most node in v_i's subtree).
     Convert all queries from (v_i, k_i) to (L_i, R_i, k_i).
-    Let be F_c the number of nodes of color c and F_j the number of F_c that has
-    value j.
+    Let be F_c the number of nodes with color c and F_j the number of F_c that
+    has value j.
     Using the Mo's Algorithm, offline queries are satisfied providing the add()
     and del() functions:
     - add(): extending the range by one means that a new node is considered,
@@ -27,6 +27,8 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
+
+constexpr size_t MAX_C = 100004;
 
 template <typename T>
 struct SubtreeRanges
@@ -77,16 +79,6 @@ struct Query {
     }
 };
 
-inline void add(vector<int> & freq, vector<int> & color, const int & c)
-{
-    ++freq[++color[c]];
-}
-
-inline void del(vector<int> & freq, vector<int> & color, const int & c)
-{
-    --freq[color[c]--];
-}
-
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -128,18 +120,20 @@ int main()
     // Mo's Algorithm
     sort(q.begin(), q.end());
 
-    constexpr int MAX_C = 100004;
-    vector<int> freq(MAX_C);
-    vector<int> color(MAX_C);
-
     int l = 0;
     int r = 0;
+    vector<int> freq(MAX_C);
+    vector<int> color(MAX_C);
     vector<int64_t> result(Q);
+
+    const auto add = [&](int p){ ++freq[++color[p]]; };
+    const auto del = [&](int p){ --freq[color[p]--]; };
+
     for (const auto & x : q) {
-        while (l < x.l) del(freq, color, c[sr.node[l++]]);
-        while (l > x.l) add(freq, color, c[sr.node[--l]]);
-        while (r < x.r) add(freq, color, c[sr.node[r++]]);
-        while (r > x.r) del(freq, color, c[sr.node[--r]]);
+        while (l < x.l) del(c[sr.node[l++]]);
+        while (l > x.l) add(c[sr.node[--l]]);
+        while (r < x.r) add(c[sr.node[r++]]);
+        while (r > x.r) del(c[sr.node[--r]]);
 
         result[x.i] = freq[x.k];
     }

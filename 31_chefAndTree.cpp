@@ -3,10 +3,21 @@
     Problem: https://www.codechef.com/problems/CHEFTREE
 
     Solution Description
-    
+    Decompose the tree with HLD and construct a ST that solves Range Maximum
+    Query (RMQ) for each heavy path. Store each node on the ST as $A * C_x + B$.
+    We denote a node `alive` if its value greater than 0, otherwise we consider
+    it dead.
+    Construct also a BIT which allows us to answer query of type: given a simple
+    path (u, v), return the number of alive nodes.
+    Queries of first type are solved by performing `path queries` that increment
+    by (A * w) the value of each node on the simple path (u, v).
+    Queries of second type are more involved. For each alive node on the path
+    (u, v): locate its position on the ST, add 1 on the BIT at the same position
+    and then consider it dead (e.g. setting its value to -infinity).
+    After doing so, we query the BIT on the path (u, v).
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time  Complexity: O(N + Q log^2 N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
@@ -14,55 +25,57 @@
 #include <limits>
 using namespace std;
 
+constexpr size_t MAX_N = 100004;
+
 template <typename T>
 struct BIT
 {
-    std::vector<T> x;
+    std::vector<T> b;
 
     BIT() = default;
 
     void build(int n) {
-        x[0] = 0;
+        b[0] = 0;
         for (int k = 1; k + (k & -k) <= n; ++k) {
-            x[k + (k & -k)] += x[k];
+            b[k + (k & -k)] += b[k];
         }
     }
 
-    void reserve(int n) {
-        x.reserve(n + 1);
-    }
-
-    void resize(int n, const T a) {
-        x.resize(n + 1, a);
-    }
-
     void increment(int k, T a) { // b[k] += a
-        const int n = static_cast<int>(x.size());
+        const int n = b.size();
         for (++k; k < n; k += k & -k) {
-            x[k] += a;
+            b[k] += a;
         }
     }
 
     T query(int k) { // sum b[0, k)
         T s = 0;
         for (++k; k > 0; k &= k - 1) {
-            s += x[k];
+            s += b[k];
         }
         return s;
     }
 
-    T query(int l, int r) { // query [l, r]
+    T query(int l, int r) { // sum in range [l, r)
         return query(r) - query(l - 1);
     }
 
+    void reserve(int n) {
+        b.reserve(n + 1);
+    }
+
+    void resize(int n, const T a) {
+        b.resize(n + 1, a);
+    }
+
     void clear() {
-        x.clear();
+        b.clear();
     }
 };
 
 template<typename T, T (op)(const T &, const T &), T id>
-struct SegmentTree {
-/* Inspired by https://codeforces.com/blog/entry/18051 */
+struct SegmentTree
+{
     int n;
     int h;
     vector<T> tree;
@@ -70,7 +83,7 @@ struct SegmentTree {
 
     // Build from a given vector
     void build(const vector<T> & v) {
-        n = static_cast<int>(v.size());
+        n = v.size();
         h = sizeof(int) * 8 - __builtin_clz(n);
         tree.resize(2 * n, id);
         lazy.resize(n, 0);
@@ -114,13 +127,6 @@ struct SegmentTree {
         }
     }
 
-    // Using reserve() can prevent unnecessary reallocations
-    void reserve(int n) {
-        n++;
-        tree.reserve(n);
-        lazy.reserve(n);
-    }
-
     // Change the value of a single element
     void change(int p, const T v) {
         for (tree[p += n] = v; p > 1; p >>= 1) {
@@ -128,10 +134,10 @@ struct SegmentTree {
         }
     }
 
-    // Add v to elements in the range [l, r]
+    // Add v to elements in the range [l, r)
     void increment(int l, int r, const T v) {
         l += n;
-        r += n + 1;
+        r += n;
         int l0 = l;
         int r0 = r;
         for (; l < r; l >>= 1, r >>= 1) {
@@ -142,10 +148,10 @@ struct SegmentTree {
         build(r0 - 1);
     }
 
-    // Query on range [l, r]
+    // Query on range [l, r)
     T query(int l, int r) {
         l += n;
-        r += n + 1;
+        r += n;
         push(l);
         push(r - 1);
         T resl = id;
@@ -157,6 +163,19 @@ struct SegmentTree {
         return op(resl, resr);
     }
 
+    // Using reserve() can prevent unnecessary reallocations
+    void reserve(int n) {
+        tree.reserve(2 * n);
+        lazy.reserve(n);
+    }
+
+    // Resize the Segment Tree with a constant value
+    void resize(int n, const T a = id) {
+        tree.resize(2 * n, a);
+        lazy.resize(n);
+    }
+
+    // Remove all elements
     void clear() {
         n = 0;
         h = 0;
@@ -165,10 +184,9 @@ struct SegmentTree {
     }
 };
 
-
-template <typename T, T (op)(const T &, const T &), T id, const bool valuesOnNodes = false>
-struct HLD {
-
+template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
+struct HLD
+{
     // Graph
     vector< vector<int> > adj;
     vector< vector<T> > cost;
@@ -186,6 +204,84 @@ struct HLD {
 
     HLD() = default;
     ~HLD() = default;
+
+    void add_edge(int u, int v, const T cu = id, const T cv = id) {
+        adj[u].push_back(v);
+        cost[u].push_back((valuesOnNodes ? cv : cu));
+
+        adj[v].push_back(u);
+        cost[v].push_back(cu);
+    }
+
+        // node u, parent p, depth d
+    void dfs(int u, int p, int d = 0) {
+        depth[u] = d;
+        parent[u] = p;
+        subsize[u] = 1;
+
+        for (const auto & v : adj[u]) {
+            if (v != p) {
+                dfs(v, u, d + 1);
+                subsize[u] += subsize[v];
+            }
+        }
+    }
+
+    // node u, head h , cost c
+    void hld(int u, int h, const T c = id) {
+        head[u] = h;
+        vPos[u] = vSize;
+        vArray[vSize] = c;
+        vSize++;
+
+        const int n = adj[u].size();
+        const int p = parent[u];
+
+        int iMax = -1;  // index of the node with largest subtree
+        int sMax = -1;  // subtree size
+        for (int i = 0; i < n; ++i) {
+            const int v = adj[u][i];
+            if (v != p and sMax < subsize[v]) {
+                iMax = i;
+                sMax = subsize[v];
+            }
+        }
+
+        // new node in the heavy path
+        if (iMax != -1) {
+            hld(adj[u][iMax], h, cost[u][iMax]);
+        }
+
+        // new heavy paths
+        for (int i = 0; i < n; ++i) {
+            const int v = adj[u][i];
+            if (v != p and i != iMax) {
+                hld(v, v, cost[u][i]);
+            }
+        }
+    }
+
+    void build(int u = 1, const T c = id) {
+        dfs(u, -1);
+        hld(u, u, c);
+    }
+
+    template <typename Func>
+    T path_query(int u, int v, const Func & fun) {
+        T ans = id;
+        for (; head[u] != head[v]; u = parent[head[u]]) {
+            if (depth[head[u]] < depth[head[v]]) {
+                swap(u, v);
+            }
+            ans = op(ans, fun(vPos[head[u]], vPos[u]));
+        }
+        if (!valuesOnNodes and u == v) return ans;
+        if (depth[u] < depth[v]) {
+            swap(u, v);
+        }
+        ans = op(ans, fun(vPos[v] + !valuesOnNodes, vPos[u]));
+        return ans;
+    }
 
     void reserve(size_t n) {
         n++;
@@ -218,84 +314,6 @@ struct HLD {
         vArray.resize(n, id);
     }
 
-    void add_edge(int u, int v, const T cu = id, const T cv = id) {
-        adj[u].push_back(v);
-        cost[u].push_back((valuesOnNodes ? cv : cu));
-
-        adj[v].push_back(u);
-        cost[v].push_back((valuesOnNodes ? cu : cv));
-    }
-
-        // node u, parent p, depth d
-    void dfs(int u, int p, int d = 0) {
-        depth[u] = d;
-        parent[u] = p;
-        subsize[u] = 1;
-
-        for (const auto & v : adj[u]) {
-            if (v != p) {
-                dfs(v, u, d + 1);
-                subsize[u] += subsize[v];
-            }
-        }
-    }
-
-    // node u, head h , cost c
-    void hld(int u, int h, const T c = id) {
-        head[u] = h;
-        vPos[u] = vSize;
-        vArray[vSize] = c;
-        vSize++;
-
-        const int n = adj[u].size();
-        const int p = parent[u];
-
-        int iMax = -1;  // index of node with maximum subtree
-        int sMax = -1;  // subtree size
-        for (int i = 0; i < n; ++i) {
-            const int v = adj[u][i];
-            if (v != p and sMax < subsize[v]) {
-                iMax = i;
-                sMax = subsize[v];
-            }
-        }
-
-        // new node in the heavy chain
-        if (iMax != -1) {
-            hld(adj[u][iMax], h, cost[u][iMax]);
-        }
-
-        // new chains
-        for (int i = 0; i < n; ++i) {
-            const int v = adj[u][i];
-            if (v != p and i != iMax) {
-                hld(v, v, cost[u][i]);
-            }
-        }
-    }
-
-    void build(int u = 1, const T c = id) {
-        dfs(u, -1);
-        hld(u, u, c);
-    }
-
-    template <typename Func>
-    T processPath(int u, int v, const Func & fun) {
-        T ans = id;
-        for (; head[u] != head[v]; u = parent[head[u]]) {
-            if (depth[head[u]] < depth[head[v]]) {
-                swap(u, v);
-            }
-            ans = op(ans, fun(vPos[head[u]], vPos[u]));
-        }
-        if (!valuesOnNodes and u == v) return ans;
-        if (depth[u] < depth[v]) {
-            swap(u, v);
-        }
-        ans = op(ans, fun(vPos[v] + !valuesOnNodes, vPos[u]));
-        return ans;
-    }
-
     void clear() {
         for (int i = 0; i <= vSize; ++i) {
             adj[i].clear();
@@ -313,7 +331,6 @@ struct HLD {
     }
 };
 
-
 template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
 struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
 
@@ -321,6 +338,51 @@ struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
 
     SegmentTree<T, op, id> st;
     BIT<T> b;
+
+    void build(int u = 1, const T c = id) {
+        super::build(u, c);
+        st.build(super::vArray);
+        b.build(super::vSize);
+    }
+
+    void change(int u, const T c) {
+        st.change(super::vPos[u], c);
+    }
+
+    void increment(int u, int v, const T c) {
+        super::path_query(u, v, [this, c](const int u, const int v) {
+            st.increment(u, v + 1, c);
+            return id;
+        });
+    }
+
+    int query_pos(int l, int r) {
+        if (st.query(l, r + 1) < 0) return -1;
+        if (l == r) return l;
+
+        const int m = l + (r - l) / 2;
+        int pos = query_pos(l, m);
+        if (pos == -1) pos = query_pos(m + 1, r);
+        return pos;
+    };
+
+    void die_nodes() {
+        while (st.query(0, super::vSize) >= 0) {
+            const int pos = query_pos(0, super::vSize - 1);
+            st.change(pos, id);
+            b.increment(pos, 1);
+        }
+    };
+
+    T query(int u, int v) {
+        die_nodes();
+        T ans = 0;
+        super::path_query(u, v, [&](const int u, const int v) {
+            ans += b.query(u, v);
+            return id;
+        });
+        return ans;
+    }
 
     void reserve(size_t n) {
         super::reserve(n);
@@ -335,51 +397,6 @@ struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
         b.resize(n, 0);
     }
 
-    void build(int u = 1, const T c = id) {
-        super::build(u, c);
-        st.build(super::vArray);
-        b.build(super::vSize);
-    }
-
-    void change(int u, const T v) {
-        st.change(super::vPos[u], v);
-    }
-
-    void increment(int u, int v, const T c) {
-        super::processPath(u, v, [this, c](const int u, const int v) {
-            st.increment(u, v, c);
-            return id;
-        });
-    }
-
-    int query_pos(int l, int r) {
-        if (st.query(l, r) < 0) return -1;
-        if (l == r) return l;
-
-        const int m = l + (r - l) / 2;
-        int pos = query_pos(l, m);
-        if (pos == -1) pos = query_pos(m + 1, r);
-        return pos;
-    };
-
-    void die_nodes() {
-        while (st.query(0, super::vSize - 1) >= 0) {
-            const int pos = query_pos(0, super::vSize - 1);
-            st.change(pos, id);
-            b.increment(pos, 1);
-        }
-    };
-
-    T query(int u, int v) {
-        die_nodes();
-        T ans = 0;
-        super::processPath(u, v, [&](const int u, const int v) {
-            ans += b.query(u, v);
-            return id;
-        });
-        return ans;
-    }
-
     void clear() {
         super::clear();
         st.clear();
@@ -387,15 +404,12 @@ struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
     }
 };
 
-
 template <typename T>
 struct Operator
 {
     static constexpr T op(const T & a, const T & b) { return a > b ? a : b; };
     static constexpr T id = numeric_limits<T>::min();
 };
-
-#define MAX_N 100004
 
 int main()
 {
@@ -420,13 +434,12 @@ int main()
         cin >> A;
         cin >> B;
 
-        hld.resize(N);
         label.resize(N + 1);
-
         for (int i = 1; i <= N; ++i) {
             cin >> label[i];
         }
 
+        hld.resize(N);
         for (int i = 1; i < N; ++i) {
             int u;
             int v;
@@ -434,7 +447,6 @@ int main()
             cin >> v;
             hld.add_edge(u, v, A * label[u] + B, A * label[v] + B);
         }
-
         hld.build(1, A * label[1] + B);
 
         while (Q--) {

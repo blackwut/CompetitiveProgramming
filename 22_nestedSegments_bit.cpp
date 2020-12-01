@@ -7,7 +7,7 @@
     Sort the segments by r_i and replace r_i with its rank.
     Sort again the segments in decreasing order by l_i.
     Make use of a BIT (Binary Index Tree) to keep track of the already visited
-    segments. For each segment processed:
+    segments. For each segment do the following:
     - add 1 at position r_i to the BIT
     - then get the sum in the range [0, r_i), that represents the number of
       nested segments
@@ -24,15 +24,14 @@ using namespace std;
 template <typename T>
 struct BIT
 {
-    // Inspired by https://github.com/spaghetti-source/algorithm/blob/master/data_structure/fenwick_tree.cc
     vector<T> b;
 
-    BIT(size_t n)
+    BIT(int n)
     : b(n + 1)
     {}
 
     void increment(int k, T a) { // b[k] += a
-        const int n = static_cast<int>(b.size());
+        const int n = b.size();
         for (++k; k < n; k += k & -k) {
             b[k] += a;
         }
@@ -87,8 +86,8 @@ int main()
         b.increment(v[n].r, 1);
     }
 
-    for (int n = 0; n < N; ++n) {
-        cout << result[n] << '\n';
+    for (const auto & r : result) {
+        cout << r << '\n';
     }
 
     return 0;

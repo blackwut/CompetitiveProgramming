@@ -3,102 +3,85 @@
     Problem: https://codeforces.com/problemset/problem/652/D?locale=en
 
     Solution Description
-    Sort the segments <l_i, r_i> by r_i and calculate the rank of each segment.
-    Sort segments <l_i, r_i> in decreasing order by l_i.
-    Make use of a ST (Segment Tree to keep) track, using the rank as index, of
-    the already visited segments. For each segment processed, add 1 to
-    the ST at its rank, then get the sum from 0 to its r_i, that is the number
-    of nested segments.
+    The i-th segment is stored as a tuple <l_i, r_i>.
+    Sort the segments by r_i and replace r_i with its rank.
+    Sort again the segments in decreasing order by l_i.
+    Make use of a Segment Tree to keep track of the already visited segments.
+    For each segment processed do the following:
+    - add 1 at position r_i to the Segment Tree
+    - then get the sum querying the range [0, r_i), that represents the number
+      of nested segments
 
     Time  Complexity: O(N log N)
     Space Complexity: O(N)
 */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-#include <tuple>
-
+#include <algorithm>
 using namespace std;
 
-#define SUBMIT_ONLINE 1
-#if !SUBMIT_ONLINE
-#include "Structures/SegmentTree.hpp"
-#else
-#include <functional>
-
-template<typename T>
+template<typename T, T (op)(const T &, const T &), T id>
 struct SegmentTree
 {
-private:
     int n;
     vector<T> tree;
-    function<T(const T &, const T &)> op;
-    T id;
 
-public:
+    // Build with constant value v
+    void build(int s, const T v) {
+        n = s;
+        tree.resize(2 * n, v);
+        build();
+    }
 
-    SegmentTree(function<T(const T &, const T &)> binaryOperation,
-                const T identityValue)
-    : op(binaryOperation),
-      id(identityValue)
-    {}
-
-    void buildConstant(const int size, const T & val)
-    {
-        n = size;
-        tree.resize(2 * n, id);
-        for(int i = 0; i < n; ++i) {
-            tree[n + 1] = val;
-        }
-
+    // Build after manual initialization of values
+    void build() {
         for (int i = n - 1; i > 0; --i) {
             tree[i] = op(tree[i << 1], tree[i << 1 | 1]);
         }
     }
 
-    void build(const vector<T> & v)
-    {
-        n = v.size();
-        tree.resize(2 * n, id);
-        for(int i = 0; i < n; ++i) {
-            tree[n + 1] = v[i];
-        }
-
-        for (int i = n - 1; i > 0; --i) {
-            tree[i] = op(tree[i << 1], tree[i << 1 | 1]);
+    // Change the value of a single element
+    void change(int p, const T v) {
+        for (tree[p += n] = v; p > 1; p >>= 1) {
+            tree[p >> 1] = op(tree[p], tree[p ^ 1]);
         }
     }
 
-    void update(int pos, T delta)
-    {
-        tree[n + pos] += delta;
-
-        for (int i = pos + n; i > 1; i >>= 1) {
-            tree[i >> 1] = op(tree[i], tree[i ^ 1]);
+    // Add v to a single element
+    void increment(int p, const T v) {
+        for (tree[p += n] += v; p > 1; p >>= 1) {
+            tree[p >> 1] = op(tree[p], tree[p ^ 1]);
         }
     }
 
-    T query(int l, int r)
-    {
-        T result = id;
-
+    // Query on range [l, r)
+    T query(int l, int r) {
         l += n;
         r += n;
+        T resl = id;
+        T resr = id;
         for (; l < r; l >>= 1, r >>= 1) {
-            if (l & 1) result = op(result, tree[l++]);
-            if (r & 1) result = op(result, tree[--r]);
+            if (l & 1) resl = op(resl, tree[l++]);
+            if (r & 1) resr = op(tree[--r], resr);
         }
-        return result;
+        return op(resl, resr);
     }
 };
-#endif
 
+template <typename T>
+struct Operator
+{
+    static T op(const T & a, const T & b) { return a + b; };
+    static const T id = 0;
+};
 
-#define RANGE tuple<int, int, int>
-#define R_LEFT    0
-#define R_RIGHT   1
-#define R_RANK    2
+struct Seg
+{
+    int l;
+    int r;
+    int i;
+};
 
 int main()
 {
@@ -108,53 +91,35 @@ int main()
     int N;
     cin >> N;
 
-    // <left, right, rank>
-    vector< RANGE > v(N);
-    vector<int> results(N);
-
+    vector<Seg> v(N);
     for (int n = 0; n < N; ++n) {
-        int left;
-        int right;
-        cin >> left;
-        cin >> right;
-        v[n] = make_tuple(left, right, n);
+        cin >> v[n].l;
+        cin >> v[n].r;
+        v[n].i = n;
     }
 
-    // sort by right in increasing order
-    sort(v.begin(), v.end(),
-        [](const RANGE & lhs, const RANGE & rhs) {
-            return get<R_RIGHT>(lhs) < get<R_RIGHT>(rhs);
-        });
-
-    // tuple<left, sorted_rank_right, rank>
+    // sort by right in increasing order and replace r_i with its rank
+    auto compR = [](const Seg & lhs, const Seg & rhs) { return lhs.r < rhs.r; };
+    sort(v.begin(), v.end(), compR);
     for (int n = 0; n < N; ++n) {
-        get<R_RIGHT>(v[n]) = n;
+        v[n].r = n;
     }
 
     // sort by left in decreasing order
-    sort(v.begin(), v.end(),
-        [](const RANGE & lhs, const RANGE & rhs) {
-            return get<R_LEFT>(lhs) > get<R_LEFT>(rhs);
-        });
+    auto compL = [](const Seg & lhs, const Seg & rhs) { return lhs.l > rhs.l; };
+    sort(v.begin(), v.end(), compL);
 
-    auto sumOp = [](const int & lhs, const int & rhs){ return lhs + rhs; };
-    SegmentTree<int> st(sumOp, 0);
-    st.buildConstant(N, 0);
-
+    SegmentTree<int, Operator<int>::op, Operator<int>::id> st;
+    st.build(N, 0);
+    vector<int> result(N);
     for (int n = 0; n < N; ++n) {
-        const int id = get<R_RIGHT>(v[n]);
-        const int rank = get<R_RANK>(v[n]);
-        results[rank] = st.query(0, id);
-        st.update(id, 1);
+        result[v[n].i] = st.query(0, v[n].r);
+        st.increment(v[n].r, 1);
     }
 
-    for (int n = 0; n < N; ++n) {
-        cout << results[n] << endl;
+    for (const auto & r : result) {
+        cout << r << '\n';
     }
-    cout << endl;
-
-    results.clear();
-    v.clear();
 
     return 0;
 }

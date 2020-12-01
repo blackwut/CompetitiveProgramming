@@ -6,23 +6,24 @@
     The problem is solved with dynamic programming.
     Let be w_i and v_i the weight and value of each i-th item respectively.
     Create a matrix K with (N+1) rows and (S+1) columns, where N is the number
-    of items and S the maximum capacity. Each element K[i][j] in this matrix
-    represent the maximum value calculated using items from 1 to i and with j
-    weight at maximum.
+    of items and S the maximum capacity. Each element K[i][j] represents the
+    maximum value calculated using items from 1 to i and with j weight at max.
     We can calculate each element of such matrix as follows:
     - K[0][j] = 0
     - K[i][0] = 0
-    - K[i][j] = max( k[i - 1][j], k[i][j - w[i]] + v[i])
-    The first line means that we have no items, so no value.
-    The second line means that we have no capacity, so no value.
-    The third one calculate the maximum between the previous calculated value,
+    - K[i][j] = max(K[i - 1][j], K[i - 1][j - w[i]] + v[i])         if j >= w[i]
+    - K[i][j] = K[i - 1][j]                                         otherwise
+    The first line means that we have no items, hence no value.
+    The second line means that we have no capacity, hence no value.
+    The third line calculates the maximum between the previous calculated value,
     not including the current item, and the value of the current item plus the
     value calculated with (j - w[i]) maximum capacity.
-    The solution can be found at K[N + 1][S + 1]
+    The forth one is needed when j - w[i] is a negative value.
+    The solution can be found at K[N][S].
 
-    The solution require a matrix with O(N * S) elements. The provided solution
-    make use of an optimization in terms of space complexity. Since the
-    algorithm need the previous and the current row of that matrix, we store
+    The solution requires a matrix with O(N * S) elements. The provided solution
+    makes use of an optimization in terms of space complexity. Since the
+    algorithm needs the previous and the current row of that matrix, we store
     only 2 * (S + 1) elements.
 
     Time  Complexity: O(N * S)
@@ -30,11 +31,9 @@
 */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-
+#include <algorithm>
 using namespace std;
-
 
 int knapsack01(const vector<int> & w, const vector<int> & v, const int S)
 {
@@ -60,9 +59,8 @@ int main()
     cin.tie(NULL);
 
     int S;
-    cin >> S;
-
     int N;
+    cin >> S;
     cin >> N;
 
     vector<int> w(N);
@@ -73,12 +71,7 @@ int main()
         cin >> v[n];
     }
 
-    int result = knapsack01(w, v, S);
-    cout << result;
-    cout << endl;
-
-    v.clear();
-    w.clear();
+    cout << knapsack01(w, v, S) << '\n';
 
     return 0;
 }

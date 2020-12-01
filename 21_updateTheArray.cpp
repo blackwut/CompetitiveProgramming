@@ -14,7 +14,7 @@
     The previous solution can be solved similarly with Binary Index Tree (BIT).
 
     Array Solution
-    Time  Complexity: O(U + Q)
+    Time  Complexity: O(U + N + Q)
     Space Complexity: O(N)
 
     BIT Solution
@@ -78,12 +78,8 @@ struct BIT
 {
     vector<T> b;
 
-    void resize(size_t n, const T a) {
-        b.resize(n + 1, a);
-    }
-
     void increment(int k, T a) { // b[k] += a
-        const int n = static_cast<int>(b.size());
+        const int n = b.size();
         for (++k; k < n; k += k & -k) {
             b[k] += a;
         }
@@ -95,6 +91,14 @@ struct BIT
             s += b[k];
         }
         return s;
+    }
+
+    void reserve(int n) {
+        b.reserve(n + 1);
+    }
+
+    void resize(int n, const T a) {
+        b.resize(n + 1, a);
     }
 
     void clear() {

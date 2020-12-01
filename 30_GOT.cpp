@@ -3,10 +3,27 @@
     Problem: https://www.spoj.com/problems/GOT/
 
     Solution Description
-    https://codeforces.com/blog/entry/22967?#comment-274508
+    The problem can be restated as follows.
+    Let A be the same tree of the problem with node values set to -1.
+    We define two types of query:
+    1) Change(x, c): assign the value c to the node x
+    2) Query(a, b, c): check if the value c is present in the simple path (a, b)
+    The problem is solved with offline queries.
+    Consider the input tree nodes as queries of the first type, where x is the
+    node itself and c is the node value. The queries provided by the problem are
+    of the second type. Sort all queries in increasing order by value c, and in
+    case of a tie, sort them by type (first type goes first). This way, when we
+    answer queries of the second type, A will always have elements less than or
+    equal to c, never greater. Let consider a query of second type
+    Query(a, b, c), and let M be the maximum element of A in the simple path
+    (a, b). If M < c, then we can be sure that there is not any c in this path.
+    Otherwise there is a value c somewhere, and this is enough because we do not
+    care about its position.
+    The problem is solved with HLD and ST that solves Range Maximum Query for
+    each heavy path.
 
-    Time  Complexity: O()
-    Space Complexity: O()
+    Time  Complexity: O((N + Q) log^2 N)
+    Space Complexity: O(N)
 */
 
 #include <iostream>
@@ -14,20 +31,19 @@
 #include <algorithm>
 using namespace std;
 
+constexpr size_t MAX_N = 100000;
+constexpr size_t MAX_M = 200000;
+
 template<typename T, T (op)(const T &, const T &), T id>
-struct SegmentTree {
-/* Inspired by https://codeforces.com/blog/entry/18051 */
+struct SegmentTree
+{
     int n;
-    int h;
     vector<T> tree;
-    vector<int> lazy;
 
     // Build from a given vector
     void build(const vector<T> & v) {
-        n = static_cast<int>(v.size());
-        h = sizeof(int) * 8 - __builtin_clz(n);
+        n = v.size();
         tree.resize(2 * n, id);
-        lazy.resize(n, 0);
         for (int i = 0; i < n; ++i) {
             tree[n + i] = v[i];
         }
@@ -41,40 +57,6 @@ struct SegmentTree {
         }
     }
 
-    // Update all the parents of a given node
-    void build(int p) {
-        while (p > 1) {
-            p >>= 1;
-            tree[p] = op(tree[p << 1], tree[p << 1 | 1]) + lazy[p];
-        }
-    }
-
-    // Helper function
-    void apply(int p, const T v) {
-        tree[p] += v;
-        if (p < n) lazy[p] += v;
-    }
-
-    // Propagates changes from all the parents of a given node down the tree
-    // Parents are exactly the prefixes of p in binary notation
-    void push(int p) {
-        for (int s = h; s > 0; --s) {
-            int i = p >> s;
-            if (lazy[i] != 0) {
-                apply(i << 1, lazy[i]);
-                apply(i << 1 | 1, lazy[i]);
-                lazy[i] = 0;
-            }
-        }
-    }
-
-    // Using reserve() can prevent unnecessary reallocations
-    void reserve(size_t n) {
-        n++;
-        tree.reserve(n);
-        lazy.reserve(n);
-    }
-
     // Change the value of a single element
     void change(int p, const T v) {
         for (tree[p += n] = v; p > 1; p >>= 1) {
@@ -82,26 +64,10 @@ struct SegmentTree {
         }
     }
 
-    // Add v to elements in the range [l, r)
-    void increment(int l, int r, const T v) {
-        l += n;
-        r += n;
-        int l0 = l;
-        int r0 = r;
-        for (; l < r; l >>= 1, r >>= 1) {
-            if (l & 1) apply(l++, v);
-            if (r & 1) apply(--r, v);
-        }
-        build(l0);
-        build(r0 - 1);
-    }
-
     // Query on range [l, r)
     T query(int l, int r) {
         l += n;
         r += n;
-        push(l);
-        push(r - 1);
         T resl = id;
         T resr = id;
         for (; l < r; l >>= 1, r >>= 1) {
@@ -111,17 +77,21 @@ struct SegmentTree {
         return op(resl, resr);
     }
 
+    // Using reserve() can prevent unnecessary reallocations
+    void reserve(int n) {
+        tree.reserve(2 * n);
+    }
+
+    // Remove all elements
     void clear() {
         n = 0;
-        h = 0;
         tree.clear();
-        lazy.clear();
     }
 };
 
 template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
-struct HLD {
-
+struct HLD
+{
     // Graph
     vector< vector<int> > adj;
     vector< vector<T> > cost;
@@ -139,6 +109,84 @@ struct HLD {
 
     HLD() = default;
     ~HLD() = default;
+
+    void add_edge(int u, int v, const T cu = id, const T cv = id) {
+        adj[u].push_back(v);
+        cost[u].push_back((valuesOnNodes ? cv : cu));
+
+        adj[v].push_back(u);
+        cost[v].push_back(cu);
+    }
+
+        // node u, parent p, depth d
+    void dfs(int u, int p, int d = 0) {
+        depth[u] = d;
+        parent[u] = p;
+        subsize[u] = 1;
+
+        for (const auto & v : adj[u]) {
+            if (v != p) {
+                dfs(v, u, d + 1);
+                subsize[u] += subsize[v];
+            }
+        }
+    }
+
+    // node u, head h , cost c
+    void hld(int u, int h, const T c = id) {
+        head[u] = h;
+        vPos[u] = vSize;
+        vArray[vSize] = c;
+        vSize++;
+
+        const int n = adj[u].size();
+        const int p = parent[u];
+
+        int iMax = -1;  // index of the node with largest subtree
+        int sMax = -1;  // subtree size
+        for (int i = 0; i < n; ++i) {
+            const int v = adj[u][i];
+            if (v != p and sMax < subsize[v]) {
+                iMax = i;
+                sMax = subsize[v];
+            }
+        }
+
+        // new node in the heavy path
+        if (iMax != -1) {
+            hld(adj[u][iMax], h, cost[u][iMax]);
+        }
+
+        // new heavy paths
+        for (int i = 0; i < n; ++i) {
+            const int v = adj[u][i];
+            if (v != p and i != iMax) {
+                hld(v, v, cost[u][i]);
+            }
+        }
+    }
+
+    void build(int u = 1, const T c = id) {
+        dfs(u, -1);
+        hld(u, u, c);
+    }
+
+    template <typename Func>
+    T path_query(int u, int v, const Func & fun) {
+        T ans = id;
+        for (; head[u] != head[v]; u = parent[head[u]]) {
+            if (depth[head[u]] < depth[head[v]]) {
+                swap(u, v);
+            }
+            ans = op(ans, fun(vPos[head[u]], vPos[u]));
+        }
+        if (!valuesOnNodes and u == v) return ans;
+        if (depth[u] < depth[v]) {
+            swap(u, v);
+        }
+        ans = op(ans, fun(vPos[v] + !valuesOnNodes, vPos[u]));
+        return ans;
+    }
 
     void reserve(size_t n) {
         n++;
@@ -171,84 +219,6 @@ struct HLD {
         vArray.resize(n, id);
     }
 
-    void add_edge(int u, int v, const T c = id) {
-        adj[u].push_back(v);
-        cost[u].push_back(c);
-
-        adj[v].push_back(u);
-        cost[v].push_back(c);
-    }
-
-        // node u, parent p, depth d
-    void dfs(int u, int p, int d = 0) {
-        depth[u] = d;
-        parent[u] = p;
-        subsize[u] = 1;
-
-        for (const auto & v : adj[u]) {
-            if (v != p) {
-                dfs(v, u, d + 1);
-                subsize[u] += subsize[v];
-            }
-        }
-    }
-
-    // node u, head h , cost c
-    void hld(int u, int h, const T c = id) {
-        head[u] = h;
-        vPos[u] = vSize;
-        vArray[vSize] = c;
-        vSize++;
-
-        const int n = adj[u].size();
-        const int p = parent[u];
-
-        int iMax = -1;  // index of node with maximum subtree
-        int sMax = -1;  // subtree size
-        for (int i = 0; i < n; ++i) {
-            const int v = adj[u][i];
-            if (v != p and sMax < subsize[v]) {
-                iMax = i;
-                sMax = subsize[v];
-            }
-        }
-
-        // new node in the heavy chain
-        if (iMax != -1) {
-            hld(adj[u][iMax], h, cost[u][iMax]);
-        }
-
-        // new chains
-        for (int i = 0; i < n; ++i) {
-            const int v = adj[u][i];
-            if (v != p and i != iMax) {
-                hld(v, v, cost[u][i]);
-            }
-        }
-    }
-
-    void build(int u = 1, const T c = id) {
-        dfs(u, -1);
-        hld(u, u, c);
-    }
-
-    template <typename Func>
-    T processPath(int u, int v, const Func & fun) {
-        T ans = id;
-        for (; head[u] != head[v]; u = parent[head[u]]) {
-            if (depth[head[u]] < depth[head[v]]) {
-                swap(u, v);
-            }
-            ans = op(ans, fun(vPos[head[u]], vPos[u]));
-        }
-        if (!valuesOnNodes and u == v) return ans;
-        if (depth[u] < depth[v]) {
-            swap(u, v);
-        }
-        ans = op(ans, fun(vPos[v] + !valuesOnNodes, vPos[u]));
-        return ans;
-    }
-
     void clear() {
         for (int i = 0; i <= vSize; ++i) {
             adj[i].clear();
@@ -266,7 +236,6 @@ struct HLD {
     }
 };
 
-
 template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
 struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
 
@@ -274,25 +243,25 @@ struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
 
     SegmentTree<T, op, id> st;
 
-    void reserve(size_t n) {
-        super::reserve(n);
-        n++;
-        st.reserve(n);
-    }
-
     void build(int u = 1, const T c = id) {
         super::build(u, c);
         st.build(super::vArray);
     }
 
-    void change(int u, const T v) {
-        st.change(super::vPos[u], v);
+    void change(int u, const T c) {
+        st.change(super::vPos[u] + !valuesOnNodes, c);
     }
 
     T query(int u, int v) {
-        return super::processPath(u, v, [this](const int u, const int v) {
+        return super::path_query(u, v, [this](const int u, const int v) {
                    return st.query(u, v + 1);
                });
+    }
+
+    void reserve(size_t n) {
+        super::reserve(n);
+        n++;
+        st.reserve(n);
     }
 
     void clear() {
@@ -319,14 +288,10 @@ struct Query {
     int c;
     int i;
 
-    inline bool operator<(const Query & rhs) const
-    {
+    inline bool operator<(const Query & rhs) const {
         return (c == rhs.c) ? type < rhs.type : c < rhs.c;
     }
 };
-
-#define MAX_N 100000
-#define MAX_M 200000
 
 int main()
 {
@@ -346,23 +311,20 @@ int main()
     int M;
     while (cin >> N >> M) {
 
-        hld.resize(N);
-        result.resize(M);
-
         for (int i = 1; i <= N; ++i) {
             int c;
             cin >> c;
             Q.push_back({Query::Type::Change, i, -1, c, -1});
         }
 
+        hld.resize(N);
         for (int i = 1; i < N; ++i) {
             int u;
             int v;
             cin >> u;
             cin >> v;
-            hld.add_edge(u, v, Operator<int>::id);
+            hld.add_edge(u, v);
         }
-
         hld.build();
 
         for (int i = 0; i < M; ++i) {
@@ -376,6 +338,7 @@ int main()
         }
         sort(Q.begin(), Q.end());
 
+        result.resize(M);
         for (const auto & q : Q) {
             if (q.type == Query::Type::Change) {
                 hld.change(q.u, q.c);
@@ -384,8 +347,8 @@ int main()
             }
         }
 
-        for (int i = 0; i < M; ++i) {
-            cout << (result[i] ? "Find" : "NotFind") << '\n';
+        for (const auto & r : result) {
+            cout << (r ? "Find" : "NotFind") << '\n';
         }
 
         result.clear();

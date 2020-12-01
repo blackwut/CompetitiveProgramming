@@ -34,12 +34,12 @@ struct BIT
 {
     vector<T> b;
 
-    BIT(size_t n)
+    BIT(int n)
     : b(n + 1)
     {}
 
     void increment(int k, T a) { // b[k] += a
-        const int n = static_cast<int>(b.size());
+        const int n = b.size();
         for (++k; k < n; k += k & -k) {
             b[k] += a;
         }

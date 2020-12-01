@@ -5,8 +5,8 @@
     Solution Description
     Make use of a SegmentTree with lazy propagation.
     Let l and r the left and the right index of the array respectively.
-    Since we are simulating a Circular array, if l <= r we make RMQ and INC
-    from l to r, otherwise make them from 0 to r and from l to N - 1.
+    Since we are simulating a Circular array, if l <= r we perform RMQ and INC
+    from l to r, otherwise perform them from 0 to r and from l to N - 1.
 
     Time  Complexity: O(N + M log N)
     Space Complexity: O(N)
@@ -21,129 +21,95 @@
 #include <sstream>
 using namespace std;
 
-template<typename T>
-struct SegmentTreeLazy
+template<typename T, T (op)(const T &, const T &), T id>
+struct SegmentTree
 {
-private:
-
-#define LEFT(i)     ((i << 1) + 1)
-#define MID(i, j)   ((l) + ((r) - (l)) / 2)
-#define RIGHT(i)    ((i << 1) + 2)
-
-    size_t n;
+    int n;
+    int h;
     vector<T> tree;
     vector<T> lazy;
-    function<T(const T &, const T &)> op;
-    T id;
 
-    void build(const vector<T> & v, size_t l, size_t r, size_t i)
-    {
-        // out of range
-        if (l > r) return;
-
-        // leaf
-        if (l == r) {
-            tree[i] = v[l];
-            return;
-        }
-
-        const size_t m = MID(l, r);
-        build(v, l,     m, LEFT(i));
-        build(v, m + 1, r, RIGHT(i));
-        tree[i] = op(tree[LEFT(i)], tree[RIGHT(i)]);
-    }
-
-    void updateRangeUtil(size_t l,  size_t r,
-                         size_t ul, size_t ur,
-                         size_t i, T diff)
-    {
-        if (lazy[i] != 0) {
-            tree[i] += lazy[i];
-            if (l != r) {
-                lazy[LEFT(i)]  += lazy[i];
-                lazy[RIGHT(i)] += lazy[i];
-            }
-            lazy[i] = 0;
-        } 
-
-        // out of range
-        if (l > r or l > ur or r < ul) return;
-
-        // total overlap
-        if (l >= ul and r <= ur) {
-            tree[i] += diff;
-            if (l != r) {
-                lazy[LEFT(i)]  += diff;
-                lazy[RIGHT(i)] += diff;
-            }
-            return;
-        }
-
-        // partial overlap
-        const size_t m = MID(l, r);
-        updateRangeUtil(l,     m, ul, ur, LEFT(i),  diff);
-        updateRangeUtil(m + 1, r, ul, ur, RIGHT(i), diff);
-        tree[i] = op(tree[LEFT(i)], tree[RIGHT(i)]);
-    }
-
-    T query(size_t l, size_t r, size_t ql, size_t qr, size_t i)
-    {
-        if (lazy[i] != 0) {
-            tree[i] += lazy[i];
-            if (l != r) {
-                lazy[LEFT(i)]  += lazy[i];
-                lazy[RIGHT(i)] += lazy[i];
-            }
-            lazy[i] = 0;
-        } 
-
-        // out of range
-        if (l > r or l > qr or r < ql) return id;
-
-        // total overlap
-        if (l >= ql and r <= qr) return tree[i];
-
-        // partial overlap
-        const size_t m = MID(l, r);
-        return op(query(l,     m, ql, qr, LEFT(i)),
-                  query(m + 1, r, ql, qr, RIGHT(i))
-               );
-    }
-
-    size_t nextPowerOfTwo(size_t v)
-    {
-        return size_t(1) << static_cast<size_t>(ceil(log2(v)));
-    }
-
-public:
-
-    SegmentTreeLazy(function<T(const T &, const T &)> binaryOperation,
-                    const T identityValue)
-    : op(binaryOperation)
-    , id(identityValue)
-    {}
-
-    ~SegmentTreeLazy() { tree.clear(); lazy.clear(); }
-
-    void build(const vector<T> & v)
-    {
+    // Build from a given vector
+    void build(const vector<T> & v) {
         n = v.size();
-        const size_t nn = nextPowerOfTwo(n);
-        tree.resize(2 * nn - 1, id);
-        lazy.resize(2 * nn - 1, 0);
-
-        build(v, 0, n - 1, 0);
+        h = sizeof(int) * 8 - __builtin_clz(n);
+        tree.resize(2 * n, id);
+        lazy.resize(n, 0);
+        for (int i = 0; i < n; ++i) {
+            tree[n + i] = v[i];
+        }
+        build();
     }
 
-    void updateRange(size_t l, size_t r, T diff) 
-    {
-        updateRangeUtil(0, n - 1, l, r, 0, diff);
+    // Build after manual initialization of values
+    void build() {
+        for (int i = n - 1; i > 0; --i) {
+            tree[i] = op(tree[i << 1], tree[i << 1 | 1]);
+        }
     }
 
-    T query(size_t l, size_t r)
-    {
-        return query(0, n - 1, l, r, 0);
+    // Update all the parents of a given node
+    void build(int p) {
+        while (p > 1) {
+            p >>= 1;
+            tree[p] = op(tree[p << 1], tree[p << 1 | 1]) + lazy[p];
+        }
     }
+
+    // Helper function
+    void apply(int p, const T v) {
+        tree[p] += v;
+        if (p < n) lazy[p] += v;
+    }
+
+    // Propagates changes from all the parents of a given node down the tree
+    // Parents are exactly the prefixes of p in binary notation
+    void push(int p) {
+        for (int s = h; s > 0; --s) {
+            int i = p >> s;
+            if (lazy[i] != 0) {
+                apply(i << 1, lazy[i]);
+                apply(i << 1 | 1, lazy[i]);
+                lazy[i] = 0;
+            }
+        }
+    }
+
+    // Add v to elements in the range [l, r)
+    void increment(int l, int r, const T v) {
+        l += n;
+        r += n;
+        int l0 = l;
+        int r0 = r;
+        for (; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) apply(l++, v);
+            if (r & 1) apply(--r, v);
+        }
+        build(l0);
+        build(r0 - 1);
+    }
+
+    // Query on range [l, r)
+    T query(int l, int r) {
+        l += n;
+        r += n;
+        push(l);
+        push(r - 1);
+        T resl = id;
+        T resr = id;
+        for (; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) resl = op(resl, tree[l++]);
+            if (r & 1) resr = op(tree[--r], resr);
+        }
+        return op(resl, resr);
+    }
+};
+
+template <typename T>
+struct Operator
+{
+    static T op(const T & a, const T & b) { return a < b ? a : b; };
+    static const T id = numeric_limits<T>::max();
 };
 
 int main()
@@ -153,16 +119,13 @@ int main()
 
     int N;
     cin >> N;
-    
+
     vector<int64_t> v(N);
     for (int n = 0; n < N; ++n) {
         cin >> v[n];
     }
 
-    auto op = [](const int64_t & lhs, const int64_t & rhs) {
-                  return (lhs < rhs) ? lhs : rhs;
-              };
-    SegmentTreeLazy<int64_t> st(op, numeric_limits<int64_t>::max());
+    SegmentTree<int64_t, Operator<int64_t>::op, Operator<int64_t>::id> st;
     st.build(v);
 
     int M;
@@ -188,21 +151,20 @@ int main()
 
         if (RMQ) {
             if (l <= r) {
-                cout << st.query(l, r) << '\n';
+                cout << st.query(l, r + 1) << '\n';
             } else {
-                cout << op(st.query(0, r), st.query(l, N - 1)) << '\n';
+                cout << Operator<int64_t>::op(st.query(0, r + 1),
+                                              st.query(l, N)) << '\n';
             }
         } else { // INC
             if (l <= r) {
-                st.updateRange(l, r, x);
+                st.increment(l, r + 1, x);
             } else {
-                st.updateRange(0, r    , x);
-                st.updateRange(l, N - 1, x);
+                st.increment(0, r + 1, x);
+                st.increment(l, N    , x);
             }
         }
     }
-
-    v.clear();
 
     return 0;
 }

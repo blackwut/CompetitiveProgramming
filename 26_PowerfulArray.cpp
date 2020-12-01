@@ -1,7 +1,6 @@
 /**
     Author:  Alberto Ottimo
     Problem: http://codeforces.com/contest/86/problem/D
-    Compiler: GNU C++17
 
     Solution Description
     Let be K_s the number of occurrences of a value s and P the power of the
@@ -9,14 +8,14 @@
     This solution is based on Mo's Algorithm. The add() and del() functions for
     a value s are defined as follows:
     - add(): extend the range by 1 means that the power of a sub-array goes from
-             (K_s)^2 * s to (K_s + 1)^2 * s, hence the difference between this
+             (K_s)^2 * s to (K_s + 1)^2 * s, hence the difference between these
              two terms is (2 * K_s + s)
-    - del(): extend the range by 1 means that the power of a sub-array goes from
-             (K_s)^2 * s to (K_s - 1)^2 * s, hence the difference between this
+    - del(): reduce the range by 1 means that the power of a sub-array goes from
+             (K_s)^2 * s to (K_s - 1)^2 * s, hence the difference between these
              two terms is -(2 * K_s + s)
 
-    Time  Complexity: O((N + Q) * SQRT(N)
-    Space Complexity: O(MAX_N)
+    Time  Complexity: O((N + Q) * SQRT(N))
+    Space Complexity: O(MAX_V)
 */
 
 #include <iostream>
@@ -24,8 +23,10 @@
 #include <algorithm>
 using namespace std;
 
-struct Query {
+constexpr size_t MAX_V = 1000004;
 
+struct Query
+{
     int l;
     int r;
     int i;
@@ -38,17 +39,6 @@ struct Query {
         return (r < rhs.r) ^ (l / SQRT_N & 1);
     }
 };
-
-inline int64_t add(const vector<int> & v, vector<int> & c, int pos) {
-    // equivalent to (1 + 2 * K_s) * s
-    return int64_t(2) * c[v[pos]]++ * v[pos] + v[pos];
-
-}
-
-inline int64_t del(const vector<int> & v, vector<int> & c, int pos) {
-    // equivalent to (1 + 2 * K_s) * s
-    return int64_t(2) * --c[v[pos]] * v[pos] + v[pos];
-}
 
 int main()
 {
@@ -78,14 +68,17 @@ int main()
     int l = 0;
     int r = 0;
     int64_t ret = 0;
-    vector<int> c(1000004);
+    vector<int> c(MAX_V);
     vector<int64_t> result(Q);
 
+    const auto add = [&](int p){ return (int64_t)2 * c[v[p]]++ * v[p] + v[p]; };
+    const auto del = [&](int p){ return (int64_t)2 * --c[v[p]] * v[p] + v[p]; };
+
     for (const auto & x : q) {
-        while (l < x.l) ret -= del(v, c, l++);
-        while (l > x.l) ret += add(v, c, --l);
-        while (r < x.r) ret += add(v, c, ++r);
-        while (r > x.r) ret -= del(v, c, r--);
+        while (l < x.l) ret -= del(l++);
+        while (l > x.l) ret += add(--l);
+        while (r < x.r) ret += add(++r);
+        while (r > x.r) ret -= del(r--);
 
         result[x.i] = ret;
     }
