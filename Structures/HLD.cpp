@@ -33,14 +33,6 @@
 */
 
 template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
-struct HLD_ext : HLD<T, op, id, valuesOnNodes> {
-
-    using super = HLD<T, op, id, valuesOnNodes>;
-
-    SegmentTree<T, op, id> st;
-    BIT<T> b;
-
-template <typename T, T (op)(const T &, const T &), T id, bool valuesOnNodes = false>
 struct HLD
 {
     // Graph

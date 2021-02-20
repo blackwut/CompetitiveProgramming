@@ -102,7 +102,6 @@ struct SegmentTree
     // Resize the Segment Tree with a constant value
     void resize(int n, const T a = id) {
         tree.resize(2 * n, a);
-        lazy.resize(n);
     }
 
     // Remove all elements
